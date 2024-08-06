@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+import argparse
+
+from lib import get_born_charges, get_epsilon, get_vasprun_path
+
+
+def main(vasprun_path: str):
+    epsilon = get_epsilon(vasprun_path)
+    born_charges = get_born_charges(vasprun_path)
+
+    print("Dielectric tensor")
+    for i in range(3):
+        for j in range(3):
+            print(f"{epsilon[i][j]:+.6f}", end=" ")
+        print()
+    print()
+
+    print("Born effective charge tensor")
+    for num, born_charge in enumerate(born_charges):
+        print(f"Atom {num+1}")
+        for i in range(3):
+            for j in range(3):
+                print(f"{born_charge[i][j]:+.6f}", end=" ")
+            print()
+        print()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Get dielectric tensor")
+    vasprun_path = get_vasprun_path(parser)
+    main(vasprun_path)

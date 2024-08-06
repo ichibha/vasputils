@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
-
-import argparse
-
 from pymatgen.io.vasp import Vasprun
 
-from lib import get_vasprun, warn_nonconvergence
+from lib import process_vasprun_decorator
 
 
+@process_vasprun_decorator("Get total energy")
 def main(vasprun: Vasprun):
-    warn_nonconvergence(vasprun)
     print(f"Total energy: {vasprun.final_energy}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Get total energies")
-    vasprun = get_vasprun(parser)
-    main(vasprun)
+    main()

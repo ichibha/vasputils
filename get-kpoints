@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
-
-import argparse
-
 from pymatgen.io.vasp import Vasprun
 
-from lib import get_vasprun, warn_nonconvergence
+from lib import process_vasprun_decorator
 
 
+@process_vasprun_decorator("Get kpoints")
 def main(vasprun: Vasprun):
-    warn_nonconvergence(vasprun)
     print(vasprun.kpoints)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Get kpoints")
-    vasprun = get_vasprun(parser)
-    main(vasprun)
+    main()

@@ -1,18 +1,14 @@
 #!/usr/bin/env python3
-
-import argparse
-
 from pymatgen.io.vasp import Vasprun
 
-from lib import get_vasprun
+from lib import process_vasprun_decorator
 
 
+@process_vasprun_decorator("Check convergence")
 def main(vasprun: Vasprun):
     print(f"SCF steps converged: {vasprun.converged_electronic}")
     print(f"Ionic steps converged: {vasprun.converged_ionic}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Confirm convergence")
-    vasprun = get_vasprun(parser)
-    main(vasprun)
+    main()
