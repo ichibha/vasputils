@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+
+from pymatgen.core.structure import Structure
+from pymatgen.io.vasp import Poscar
+
+
+def main(format: str, input_filepath: str, output_filepath: str, tolerance: float):
+    # 入力ファイルの存在確認
+    if not os.path.exists(input_filepath):
+        raise FileNotFoundError(f"Input file {input_filepath} not found.")
+
+    if format == "vasp":
+        try:
+            # VASPファイルの読み込み
+            structure = Structure.from_file(input_filepath)
+        except Exception as e:
+            raise RuntimeError(f"Failed to read input file {input_filepath}: {e}")
+
+        # ユニットセルに変換
+        primitive_structure = structure.get_primitive_structure(tolerance=tolerance)
+
+        # VASPファイルとして保存
+        poscar = Poscar(primitive_structure)
+        poscar.write_file(output_filepath)
+        print(f"Primitive structure saved to {output_filepath}")
+    else:
+        raise NotImplementedError(
+            f"Conversion of the {format} structure is not implemented."
+        )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Convert structure to its primitive structure."
+    )
+    parser.add_argument(
+        "input_filepath", type=str, help="Path to the input structure file"
+    )
+    parser.add_argument(
+        "output_filepath", type=str, help="Path to the output structure file"
+    )
+    parser.add_argument(
+        "--format",
+        type=str,
+        choices=["vasp"],
+        help="Format of the input structure file",
+        required=True,
+    )
+    parser.add_argument(
+        "--tolerance",
+        type=float,
+        default=0.25,
+        help="Tolerance for finding the primitive cell (default: 0.25)",
+    )
+
+    args = parser.parse_args()
+    main(args.format, args.input_filepath, args.output_filepath, args.tolerance)
