@@ -10,13 +10,8 @@ def get_vasprun(parser: argparse.ArgumentParser):
     return Vasprun(args.vasprun_filepath)
 
 
-def show_nonconvergence_warning(vasprun: Vasprun):
+def warn_nonconvergence(vasprun: Vasprun):
     if not vasprun.converged_electronic:
         print("Warning: SCF steps not converged.")
     if not vasprun.converged_ionic:
         print("Warning: Ionic steps not converged.")
-
-
-def get_bandgap(vasprun: Vasprun):
-    bandgap = vasprun.complete_dos.get_gap()
-    return bandgap

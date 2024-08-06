@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-
 import argparse
 
 from pymatgen.io.vasp import Vasprun
 
-from lib import get_bandgap, get_vasprun, show_nonconvergence_warning
+from lib import get_vasprun, warn_nonconvergence
 
 
 def main(vasprun: Vasprun):
-    show_nonconvergence_warning(vasprun)
-    bandgap = get_bandgap(vasprun)
+    warn_nonconvergence(vasprun)
+    bandgap = vasprun.complete_dos.get_gap()
     print(f"Bandgap: {bandgap} eV")
 
 

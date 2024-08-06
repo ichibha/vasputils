@@ -4,11 +4,11 @@ import argparse
 
 from pymatgen.io.vasp import Vasprun
 
-from lib import get_vasprun, show_nonconvergence_warning
+from lib import get_vasprun, warn_nonconvergence
 
 
 def main(vasprun: Vasprun):
-    show_nonconvergence_warning(vasprun)
+    warn_nonconvergence(vasprun)
     print(f"Total energy: {vasprun.final_energy}")
 
 
