@@ -13,8 +13,7 @@ def get_vasprun_path(parser: argparse.ArgumentParser) -> str:
 
 
 def get_vasprun(parser: argparse.ArgumentParser):
-    vasprun_path = get_vasprun_path(parser)
-    return Vasprun(vasprun_path)
+    return Vasprun(get_vasprun_path(parser))
 
 
 def warn_nonconvergence(vasprun: Vasprun):
