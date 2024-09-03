@@ -3,6 +3,7 @@ import argparse
 import functools
 import xml.etree.ElementTree as ET
 
+import scipy.constants as const
 from pymatgen.io.vasp import Vasprun
 
 
@@ -77,3 +78,9 @@ def get_born_charges(vasprun_path):
 
     # ボルン有効電荷テンソルのリストを返す。
     return born_charges
+
+
+def calculate_debye_temperature(debye_frequency_thz: float):
+    debye_frequency_hz = debye_frequency_thz * 1e12
+    debye_temperature = const.h * debye_frequency_hz / const.Boltzmann
+    return debye_temperature
