@@ -2,59 +2,55 @@
 
 import argparse
 import os
+import sys
 
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp import Poscar
 
 
-def main(format: str, input_filepath: str, output_filepath: str, tolerance: float):
-    # 入力ファイルの存在確認
-    if not os.path.exists(input_filepath):
-        raise FileNotFoundError(f"Input file {input_filepath} not found.")
-
-    if format == "vasp":
-        try:
-            # VASPファイルの読み込み
-            structure = Structure.from_file(input_filepath)
-        except Exception as e:
-            raise RuntimeError(f"Failed to read input file {input_filepath}: {e}")
-
-        # ユニットセルに変換
-        primitive_structure = structure.get_primitive_structure(tolerance=tolerance)
-
-        # VASPファイルとして保存
-        poscar = Poscar(primitive_structure)
-        poscar.write_file(output_filepath)
-        print(f"Primitive structure saved to {output_filepath}")
-    else:
-        raise NotImplementedError(
-            f"Conversion of the {format} structure is not implemented."
-        )
-
-
-if __name__ == "__main__":
+def main():
+    # オプション引数を読み込む
     parser = argparse.ArgumentParser(
-        description="Convert structure to its primitive structure."
+        description="convert given poscar to primitive cell poscar"
     )
-    parser.add_argument(
-        "input_filepath", type=str, help="Path to the input structure file"
-    )
-    parser.add_argument(
-        "output_filepath", type=str, help="Path to the output structure file"
-    )
-    parser.add_argument(
-        "--format",
-        type=str,
-        choices=["vasp"],
-        help="Format of the input structure file",
-        required=True,
-    )
+    parser.add_argument("poscar_path", type=str, help="poscar path")
     parser.add_argument(
         "--tolerance",
         type=float,
         default=0.25,
-        help="Tolerance for finding the primitive cell (default: 0.25)",
+        help="tolerance for finding the primitive cell (default: 0.25)",
     )
-
     args = parser.parse_args()
-    main(args.format, args.input_filepath, args.output_filepath, args.tolerance)
+    poscar_path: str = args.poscar_path
+    tolerance: float = args.tolerance
+
+    # poscar_pathの存在を確認する
+    if not os.path.exists(poscar_path):
+        raise FileNotFoundError(f"{poscar_path} not found.")
+
+    # poscarを読み込む
+    try:
+        structure = Structure.from_file(poscar_path)
+    except Exception as e:
+        raise RuntimeError(f"Failed to read {poscar_path}: {e}")
+
+    # ユニットセルに変換する
+    primitive_structure = structure.get_primitive_structure(tolerance=tolerance)
+
+    # 既に単位胞ならば何もしない
+    if structure.num_sites == primitive_structure.num_sites:
+        print(f"{poscar_path} is already primitive cell.")
+        print("Exiting ...")
+        sys.exit(0)
+
+    # poscarファイルとして保存する
+    base, ext = os.path.splitext(os.path.basename(poscar_path))
+    output_path = f"{base}_prim"
+    if ext:
+        output_path += "." + ext
+    poscar = Poscar(primitive_structure)
+    poscar.write_file(output_path)
+
+
+if __name__ == "__main__":
+    main()
