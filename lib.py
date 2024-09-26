@@ -12,10 +12,24 @@ def process_vasprun_decorator(description):
         @functools.wraps(process_vasprun)
         def wrapper():
             parser = argparse.ArgumentParser(description=description)
-            parser.add_argument("vasprun_filepath", type=str, help="vasprun.xml path")
+            parser.add_argument("vasprun_path", type=str, help="vasprun.xml path")
             args = parser.parse_args()
-            vasprun = Vasprun(args.vasprun_filepath)
+            vasprun = Vasprun(args.vasprun_path)
             return process_vasprun(vasprun)
+
+        return wrapper
+
+    return decorator
+
+
+def process_poscar_decorator(description):
+    def decorator(process_poscar):
+        @functools.wraps(process_poscar)
+        def wrapper():
+            parser = argparse.ArgumentParser(description=description)
+            parser.add_argument("poscar_path", type=str, help="POSCAR path")
+            args = parser.parse_args()
+            return process_poscar(args.poscar_path)
 
         return wrapper
 
