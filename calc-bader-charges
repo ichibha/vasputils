@@ -2,48 +2,59 @@
 import argparse
 import os
 
-# コマンド引数としてCHGCARとPOTCARを読み込む
-parser = argparse.ArgumentParser(description="Bader charges calculator for VASP")
-parser.add_argument(
-    "--chgcar",
-    type=str,
-    required=True,
-    help="provide CHGCAR filepath",
-)
-parser.add_argument(
-    "--potcar",
-    type=str,
-    required=True,
-    help="provide POTCAR filepath",
-)
-args = parser.parse_args()
-chgcar_filepath: str = os.path.abspath(args.chgcar)
-potcar_filepath: str = os.path.abspath(args.potcar)
 
-# Bader解析を実行する
-from pymatgen.command_line.bader_caller import BaderAnalysis
+def run_bader_analysis(chgcar_filepath: str, potcar_filepath: str):
+    # Bader解析を実行する
+    from pymatgen.command_line.bader_caller import BaderAnalysis
 
-result = BaderAnalysis(chgcar_filename=chgcar_filepath, potcar_filename=potcar_filepath)
+    result = BaderAnalysis(
+        chgcar_filename=chgcar_filepath, potcar_filename=potcar_filepath
+    )
 
-# 出力する文字列配列を初期化する
-lines: list[str] = []
+    # 出力する文字列配列を初期化する
+    lines: list[str] = []
 
-# linesに見出しを加える
-lines.append("index, x(A), y(A), z(A), charge(e), radius(A), volume(A^3)")
+    # linesに見出しを加える
+    lines.append("index, x(A), y(A), z(A), charge(e), radius(A), volume(A^3)")
 
-# それぞれの原子についてループする
-for iatom, data in enumerate(result.data):
-    x, y, z = data["x"], data["y"], data["z"]  # 原子位置を取得する
-    charge = result.get_partial_charge(iatom)  # イオン電荷を取得する
-    min_dist = data["min_dist"]  # ベーダー半径を取得する
-    atomic_vol = data["atomic_vol"]  # ベーダー体積を取得する
-    # 取得情報を加工してlinesに加える
-    lines.append(f"{iatom+1}, {x}, {y}, {z}, {charge}, {min_dist}, {atomic_vol}")
+    # それぞれの原子についてループする
+    for iatom, data in enumerate(result.data):
+        x, y, z = data["x"], data["y"], data["z"]  # 原子位置を取得する
+        charge = result.get_partial_charge(iatom)  # イオン電荷を取得する
+        min_dist = data["min_dist"]  # ベーダー半径を取得する
+        atomic_vol = data["atomic_vol"]  # ベーダー体積を取得する
+        # 取得情報を加工してlinesに加える
+        lines.append(f"{iatom+1}, {x}, {y}, {z}, {charge}, {min_dist}, {atomic_vol}")
 
-# linesをCSV形式でファイル出力する
-with open("bader_analysis.csv", "w") as fout:
-    fout.writelines(line + "\n" for line in lines)
+    # linesをCSV形式でファイル出力する
+    with open("bader_analysis.csv", "w") as fout:
+        fout.writelines(line + "\n" for line in lines)
 
-# linesを画面出力する
-for line in lines:
-    print(line)
+    # linesを画面出力する
+    for line in lines:
+        print(line)
+
+
+def main():
+    # コマンド引数としてCHGCARとPOTCARを読み込む
+    parser = argparse.ArgumentParser(description="Bader charges calculator for VASP")
+    parser.add_argument(
+        "--chgcar",
+        type=str,
+        required=True,
+        help="provide CHGCAR filepath",
+    )
+    parser.add_argument(
+        "--potcar",
+        type=str,
+        required=True,
+        help="provide POTCAR filepath",
+    )
+    args = parser.parse_args()
+    chgcar_filepath: str = os.path.abspath(args.chgcar)
+    potcar_filepath: str = os.path.abspath(args.potcar)
+    run_bader_analysis(chgcar_filepath, potcar_filepath)
+
+
+if __name__ == "__main__":
+    main()

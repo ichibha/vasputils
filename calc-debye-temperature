@@ -3,10 +3,16 @@ import argparse
 
 from lib import calculate_debye_temperature
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser(description="Calculate Debye temperature (K)")
     parser.add_argument("debye_frequency_thz", type=float, help="Debye frequency (THz)")
     args = parser.parse_args()
     debye_frequency_thz: float = args.debye_frequency_thz
+
     debye_temperature = calculate_debye_temperature(debye_frequency_thz)
     print(f"Debye temperature: {debye_temperature:.4f} K")
+
+
+if __name__ == "__main__":
+    main()
