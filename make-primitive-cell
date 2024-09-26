@@ -7,13 +7,15 @@ import sys
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp import Poscar
 
+from lib import get_pymatgen_structure
+
 
 def main():
     # オプション引数を読み込む
     parser = argparse.ArgumentParser(
         description="convert given poscar to primitive cell poscar"
     )
-    parser.add_argument("poscar_path", type=str, help="poscar path")
+    parser.add_argument("poscar_path", type=str, help="POSCAR filepath", required=True)
     parser.add_argument(
         "--tolerance",
         type=float,
@@ -24,17 +26,8 @@ def main():
     poscar_path: str = args.poscar_path
     tolerance: float = args.tolerance
 
-    # poscar_pathの存在を確認する
-    if not os.path.exists(poscar_path):
-        raise FileNotFoundError(f"{poscar_path} not found.")
-
-    # poscarを読み込む
-    try:
-        structure = Structure.from_file(poscar_path)
-    except Exception as e:
-        raise RuntimeError(f"Failed to read {poscar_path}: {e}")
-
     # ユニットセルに変換する
+    structure = get_pymatgen_structure(poscar_path)
     primitive_structure = structure.get_primitive_structure(tolerance=tolerance)
 
     # 既に単位胞ならば何もしない

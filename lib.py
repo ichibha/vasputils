@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 import functools
+import os
 import xml.etree.ElementTree as ET
 
 import scipy.constants as const
+from pymatgen.core.structure import Structure
 from pymatgen.io.vasp import Vasprun
 
 
@@ -34,6 +36,17 @@ def process_poscar_decorator(description):
         return wrapper
 
     return decorator
+
+
+def get_pymatgen_structure(poscar_path: str):
+    # POSCARファイルの存在確認
+    if not os.path.exists(poscar_path):
+        raise FileNotFoundError(f"{poscar_path} not found.")
+    # POSCARを読み込む
+    try:
+        return Structure.from_file(poscar_path)
+    except Exception as e:
+        raise RuntimeError(f"Failed to read {poscar_path}: {e}")
 
 
 def get_epsilon(vasprun_path):
