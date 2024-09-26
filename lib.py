@@ -7,30 +7,14 @@ import scipy.constants as const
 from pymatgen.io.vasp import Vasprun
 
 
-def get_vasprun_path(parser: argparse.ArgumentParser) -> str:
-    parser.add_argument("vasprun_filepath", type=str, help="Path to the vasprun.xml")
-    args = parser.parse_args()
-    return args.vasprun_filepath
-
-
-def get_vasprun(parser: argparse.ArgumentParser):
-    return Vasprun(get_vasprun_path(parser))
-
-
-def warn_nonconvergence(vasprun: Vasprun):
-    if not vasprun.converged_electronic:
-        print("Warning: SCF steps not converged.")
-    if not vasprun.converged_ionic:
-        print("Warning: Ionic steps not converged.")
-
-
 def process_vasprun_decorator(description):
     def decorator(process_vasprun):
         @functools.wraps(process_vasprun)
         def wrapper():
             parser = argparse.ArgumentParser(description=description)
-            vasprun = get_vasprun(parser)
-            warn_nonconvergence(vasprun)
+            parser.add_argument("vasprun_filepath", type=str, help="vasprun.xml path")
+            args = parser.parse_args()
+            vasprun = Vasprun(args.vasprun_filepath)
             return process_vasprun(vasprun)
 
         return wrapper
