@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import re
+import shutil
+import subprocess
+import sys
+from glob import glob
+
+from pymatgen.io.vasp import Poscar
+
+from lib import get_pymatgen_structure
+
+
+def main():
+    # オプション引数を読み込む
+    parser = argparse.ArgumentParser(description="open neb structures")
+    parser.add_argument(
+        "--directory",
+        type=str,
+        default="./",
+        help="neb caculation root directory",
+    )
+    parser.add_argument(
+        "--poscar",
+        action="store_true",
+        help="open poscars",
+    )
+    parser.add_argument(
+        "--contcar",
+        action="store_true",
+        help="open contcars",
+    )
+    # parser.add_argument(
+    #     "--keep-files",
+    #     action="store_true",
+    #     help="keep structure files to disply in poscars or contcars",
+    # )
+    args = parser.parse_args()
+    calc_directory: str = args.directory
+    will_open_poscars: bool = args.poscar
+    will_open_contcars: bool = args.contcar
+    # will_keep_files: bool = args.keep_files
+
+    # 読み込み対象を決める (POSCAR or CONTCAR)
+    if will_open_poscars and not will_open_contcars:
+        basename = "POSCAR"
+    elif not will_open_poscars and will_open_contcars:
+        basename = "CONTCAR"
+    else:
+        print("Provide either --poscar or --contcar.", "Exiting ...")
+        sys.exit(1)
+
+    # 経路に沿った構造を読み込む
+    vasp_path_dict: dict[str, str] = {}
+    for vasp_path in glob(os.path.join(calc_directory, "*", basename)):
+        parts = os.path.normpath(vasp_path).split(os.path.sep)
+        key = parts[-2]
+        if re.match("^[0-9][0-9]$", key):
+            vasp_path_dict[key] = vasp_path
+
+    # 構造ファイルが見つからなければ抜ける
+    if not vasp_path_dict:
+        print(
+            f"No {basename} files found.", f"Confirm {calc_directory}.", "Exiting ..."
+        )
+
+    # 構造ファイルをsave_directoryにコピーする
+    save_directory = "poscars" if will_open_poscars else "contcars"
+    if os.path.exists(save_directory):
+        shutil.rmtree(save_directory)
+    os.makedirs(save_directory, exist_ok=True)
+    for key, vasp_path in vasp_path_dict.items():
+        new_vasp_path = os.path.join(save_directory, f"{key}.vasp")
+        shutil.copy(vasp_path, new_vasp_path)
+
+    # 構造をvestaで表示する
+    new_vasp_paths = sorted(glob(os.path.join(save_directory, "*.vasp")))
+    subprocess.run("open -a vesta".split() + new_vasp_paths)
+
+    # if not will_keep_files:
+    #     # save_directoryを削除する
+    #     shutil.rmtree(save_directory)
+
+
+if __name__ == "__main__":
+    main()
