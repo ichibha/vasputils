@@ -16,7 +16,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="convert given poscar to supercell poscar"
     )
-    parser.add_argument("poscar_path", type=str, help="POSCAR filepath", required=True)
+    parser.add_argument("poscar_path", type=str, help="POSCAR filepath")
     parser.add_argument(
         "--size",
         type=int,
@@ -27,7 +27,7 @@ def main():
     )
     args = parser.parse_args()
     poscar_path: str = args.poscar_path
-    size: tuple[int, int, int] = args.sizes
+    size: tuple[int, int, int] = args.size
 
     # スーパーセルを生成
     structure = get_pymatgen_structure(poscar_path)
@@ -36,7 +36,7 @@ def main():
     # POSCARファイルとしてスーパーセルを保存
     poscar = Poscar(supercell_structure)
     base, ext = os.path.splitext(os.path.basename(poscar_path))
-    output_path = f"{base}_supercell_{size[0]}x{size[1]}x{size[2]}{ext}"
+    output_path = f"{base}_{size[0]}x{size[1]}x{size[2]}{ext}"
     print(f"Writing out supercell structure to {output_path} ...")
     poscar.write_file(output_path)
 

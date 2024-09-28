@@ -15,7 +15,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="convert given poscar to primitive cell poscar"
     )
-    parser.add_argument("poscar_path", type=str, help="POSCAR filepath", required=True)
+    parser.add_argument("poscar_path", type=str, help="POSCAR filepath")
     parser.add_argument(
         "--tolerance",
         type=float,
