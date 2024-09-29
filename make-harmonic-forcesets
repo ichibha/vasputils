@@ -38,6 +38,8 @@ def main():
         except Exception as e:
             print(f"Cannot read {vasprun_path}: {e}")
             sys.exit(1)
+
+        print(f"{os.path.relpath(vasprun_path)} found.")
         vasprun_paths.append(vasprun_path)
 
     subprocess.run(["phonopy", "-f"] + vasprun_paths)
