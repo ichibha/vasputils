@@ -38,6 +38,20 @@ def process_poscar_decorator(description):
     return decorator
 
 
+def process_directory_decorator(description):
+    def decorator(process_poscar):
+        @functools.wraps(process_poscar)
+        def wrapper():
+            parser = argparse.ArgumentParser(description=description)
+            parser.add_argument("directory", type=str, help="directory path")
+            args = parser.parse_args()
+            return process_poscar(args.directory)
+
+        return wrapper
+
+    return decorator
+
+
 def get_pymatgen_structure(poscar_path: str):
     # POSCARファイルの存在確認
     if not os.path.exists(poscar_path):
@@ -47,9 +61,3 @@ def get_pymatgen_structure(poscar_path: str):
         return Structure.from_file(poscar_path)
     except Exception as e:
         raise RuntimeError(f"Failed to read {poscar_path}: {e}")
-
-
-def calculate_debye_temperature(debye_frequency_thz: float):
-    debye_frequency_hz = debye_frequency_thz * 1e12
-    debye_temperature = const.h * debye_frequency_hz / const.Boltzmann
-    return debye_temperature
