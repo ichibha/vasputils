@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import re
+import shutil
+import subprocess
+import sys
+from glob import glob
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="run vasp calculations for displaced structures"
+    )
+    parser.add_argument(
+        "vasp_command",
+        type=str,
+        help="command to execute vasp calculation",
+    )
+    parser.add_argument(
+        "--directory",
+        type=str,
+        default="./",
+        help="root directory of phonon calculation",
+    )
+    args = parser.parse_args()
+    vasp_command: str = args.vasp_command
+    root_directory: str = args.directory
+
+    calc_directories = [
+        os.path.abspath(directory)
+        for directory in glob(os.path.join(root_directory, "*"))
+        if re.match("^[0-9]+$", os.path.basename(directory))
+    ]
+    calc_directories.sort()
+
+    for calc_directory in calc_directories:
+        os.chdir(calc_directory)
+        subprocess.run(vasp_command, shell=True)
+
+
+if __name__ == "__main__":
+    main()
