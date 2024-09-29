@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import re
 import subprocess
-from glob import glob
+import sys
 
 from pymatgen.io.vasp.outputs import Vasprun
 
@@ -34,6 +33,11 @@ def main():
         vasprun_path = os.path.join(calc_directory, "vasprun.xml")
         if not os.path.exists(vasprun_path):
             raise FileNotFoundError(f"{vasprun_path} not found.")
+        try:
+            Vasprun(vasprun_path)
+        except Exception as e:
+            print(f"Cannot read {vasprun_path}: {e}")
+            sys.exit(1)
         vasprun_paths.append(vasprun_path)
 
     subprocess.run(["phonopy", "-f"] + vasprun_paths)
