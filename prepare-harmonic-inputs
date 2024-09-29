@@ -62,7 +62,7 @@ def main():
     if use_softlink:
         raise NotImplementedError("'--use-softlink' function not yet implemented.")
 
-    for poscar_path in glob(os.path.join(root_directory, "POSCAR-*")):
+    for poscar_path in sorted(glob(os.path.join(root_directory, "POSCAR-*"))):
         basename = os.path.basename(poscar_path)
         if not re.match(r"^POSCAR-[0-9]+$", basename):
             continue
