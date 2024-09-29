@@ -8,10 +8,6 @@ import subprocess
 import sys
 from glob import glob
 
-from pymatgen.io.vasp import Poscar
-
-from lib import get_pymatgen_structure
-
 
 def main():
     # オプション引数を読み込む

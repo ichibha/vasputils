@@ -2,10 +2,8 @@
 
 import argparse
 import os
-import sys
 
 import numpy as np
-from pymatgen.core.structure import Structure
 from pymatgen.io.vasp import Poscar
 
 from lib import get_pymatgen_structure

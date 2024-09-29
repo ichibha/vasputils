@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 import argparse
 
-from lib import calculate_debye_temperature
+import scipy.constants as const
+
+
+def calculate_debye_temperature(debye_frequency_thz: float):
+    debye_frequency_hz = debye_frequency_thz * 1e12
+    debye_temperature = const.h * debye_frequency_hz / const.Boltzmann
+    return debye_temperature
 
 
 def main():

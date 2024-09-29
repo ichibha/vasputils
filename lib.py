@@ -2,9 +2,7 @@
 import argparse
 import functools
 import os
-import xml.etree.ElementTree as ET
 
-import scipy.constants as const
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp import Vasprun
 
