@@ -5,6 +5,8 @@ import re
 import subprocess
 from glob import glob
 
+from lib import get_displacement_directories
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -25,14 +27,7 @@ def main():
     vasp_command: str = args.vasp_command
     root_directory: str = args.directory
 
-    calc_directories = [
-        os.path.abspath(directory)
-        for directory in glob(os.path.join(root_directory, "*"))
-        if re.match("^[0-9]+$", os.path.basename(directory))
-    ]
-    calc_directories.sort()
-
-    for calc_directory in calc_directories:
+    for calc_directory in get_displacement_directories(root_directory):
         os.chdir(calc_directory)
         subprocess.run(vasp_command, shell=True)
 

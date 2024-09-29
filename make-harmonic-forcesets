@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import re
+import subprocess
+from glob import glob
+
+from pymatgen.io.vasp.outputs import Vasprun
+
+from lib import get_displacement_directories
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="make FORCE_SETS with vasprun.xml for harmonic phonon calculation"
+    )
+    parser.add_argument(
+        "--directory",
+        type=str,
+        default="./",
+        help="root directory of phonon calculation",
+    )
+    args = parser.parse_args()
+    root_directory = args.directory
+
+    calc_directories = get_displacement_directories(root_directory)
+    if not calc_directories:
+        raise FileNotFoundError(
+            f"Harmonic displacement directories not found at {root_directory}."
+        )
+
+    vasprun_paths: list[str] = []
+    for calc_directory in calc_directories:
+        vasprun_path = os.path.join(calc_directory, "vasprun.xml")
+        if not os.path.exists(vasprun_path):
+            raise FileNotFoundError(f"{vasprun_path} not found.")
+        vasprun_paths.append(vasprun_path)
+
+    subprocess.run(["phonopy", "-f"] + vasprun_paths)
+
+
+if __name__ == "__main__":
+    main()

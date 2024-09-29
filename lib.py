@@ -2,6 +2,8 @@
 import argparse
 import functools
 import os
+import re
+from glob import glob
 
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp import Vasprun
@@ -36,18 +38,18 @@ def process_poscar_decorator(description):
     return decorator
 
 
-def process_directory_decorator(description):
-    def decorator(process_poscar):
-        @functools.wraps(process_poscar)
-        def wrapper():
-            parser = argparse.ArgumentParser(description=description)
-            parser.add_argument("directory", type=str, help="directory path")
-            args = parser.parse_args()
-            return process_poscar(args.directory)
+# def process_directory_decorator(description):
+#     def decorator(process_poscar):
+#         @functools.wraps(process_poscar)
+#         def wrapper():
+#             parser = argparse.ArgumentParser(description=description)
+#             parser.add_argument("directory", type=str, help="directory path")
+#             args = parser.parse_args()
+#             return process_poscar(args.directory)
 
-        return wrapper
+#         return wrapper
 
-    return decorator
+#     return decorator
 
 
 def get_pymatgen_structure(poscar_path: str):
@@ -59,3 +61,12 @@ def get_pymatgen_structure(poscar_path: str):
         return Structure.from_file(poscar_path)
     except Exception as e:
         raise RuntimeError(f"Failed to read {poscar_path}: {e}")
+
+
+def get_displacement_directories(root_directory: str):
+    calc_directories = [
+        os.path.abspath(directory)
+        for directory in glob(os.path.join(root_directory, "*"))
+        if re.match("^[0-9]+$", os.path.basename(directory))
+    ]
+    return sorted(calc_directories)
