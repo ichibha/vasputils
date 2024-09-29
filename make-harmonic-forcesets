@@ -7,7 +7,7 @@ from glob import glob
 
 from pymatgen.io.vasp.outputs import Vasprun
 
-from lib import get_displacement_directories
+from lib import search_numbered_directories
 
 
 def main():
@@ -23,7 +23,7 @@ def main():
     args = parser.parse_args()
     root_directory = args.directory
 
-    calc_directories = get_displacement_directories(root_directory)
+    calc_directories = search_numbered_directories(root_directory)
     if not calc_directories:
         raise FileNotFoundError(
             f"Harmonic displacement directories not found at {root_directory}."

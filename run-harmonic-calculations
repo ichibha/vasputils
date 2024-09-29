@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import re
 import subprocess
-from glob import glob
 
-from lib import get_displacement_directories
+from lib import search_numbered_directories
 
 
 def main():
@@ -27,7 +25,7 @@ def main():
     vasp_command: str = args.vasp_command
     root_directory: str = args.directory
 
-    for calc_directory in get_displacement_directories(root_directory):
+    for calc_directory in search_numbered_directories(root_directory):
         os.chdir(calc_directory)
         subprocess.run(vasp_command, shell=True)
 

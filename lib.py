@@ -63,10 +63,14 @@ def get_pymatgen_structure(poscar_path: str):
         raise RuntimeError(f"Failed to read {poscar_path}: {e}")
 
 
-def get_displacement_directories(root_directory: str):
-    calc_directories = [
+def search_numbered_directories(root_directory: str):
+    return search_directories("^[0-9]+$", root_directory)
+
+
+def search_directories(pattern: str, root_directory: str):
+    directories = [
         os.path.abspath(directory)
         for directory in glob(os.path.join(root_directory, "*"))
-        if re.match("^[0-9]+$", os.path.basename(directory))
+        if re.match(pattern, os.path.basename(directory))
     ]
-    return sorted(calc_directories)
+    return sorted(directories)
