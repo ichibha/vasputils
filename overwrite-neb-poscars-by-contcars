@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import shutil
+import sys
+
+from lib import search_numbered_directories
+
+
+def main():
+    # オプション引数を読み込む
+    parser = argparse.ArgumentParser(description="open neb structures")
+    parser.add_argument(
+        "--directory",
+        type=str,
+        default="./",
+        help="neb caculation root directory",
+    )
+    args = parser.parse_args()
+    root_directory: str = args.directory
+
+    calc_directories = search_numbered_directories(root_directory)
+    if len(calc_directories) <= 2:
+        raise FileNotFoundError(
+            f"NEB calculation directories not found at {root_directory}."
+        )
+    calc_directories = calc_directories[1:-1]
+
+    for calc_directory in calc_directories:
+        poscar_path = os.path.join(calc_directory, "POSCAR")
+        contcar_path = os.path.join(calc_directory, "CONTCAR")
+        if not os.path.isfile(poscar_path):
+            print(f"{poscar_path} doesn't exist or is not a file.")
+            sys.exit(1)
+        elif not os.path.isfile(contcar_path):
+            print(f"{contcar_path} doesn't exist or is not a file.")
+            sys.exit(1)
+
+        print(
+            f"Copying {os.path.relpath(contcar_path)}",
+            f"to {os.path.relpath(poscar_path)} ...",
+        )
+        shutil.copy(contcar_path, poscar_path)
+
+
+if __name__ == "__main__":
+    main()
