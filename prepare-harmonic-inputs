@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import re
+import shutil
+import sys
+from glob import glob
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="prepare input files for displaced structures for harmonic phoonon calculations"
+    )
+    parser.add_argument(
+        "--incar",
+        type=str,
+        required=True,
+        help="INCAR filepath",
+    )
+    parser.add_argument(
+        "--potcar",
+        type=str,
+        required=True,
+        help="POTCAR filepath",
+    )
+    parser.add_argument(
+        "--kpoints",
+        type=str,
+        required=True,
+        help="KPOINTS filepath",
+    )
+    parser.add_argument(
+        "--wavecar",
+        type=str,
+        help="WAVECAR filepath",
+    )
+    parser.add_argument(
+        "--directory",
+        type=str,
+        default="./",
+        help="root directory of phonon calculation",
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="overwrite calculation directionries (001/, 002, ...) if they exist",
+    )
+    parser.add_argument(
+        "--use-softlink",
+        action="store_true",
+        help="prepare inputs by softlink rather than copy",
+    )
+    args = parser.parse_args()
+    incar_path: str = args.incar
+    potcar_path: str = args.potcar
+    kpoints_path: str = args.kpoints
+    wavecar_path: str = args.wavecar
+    root_directory: str = args.directory
+    will_overwrite: bool = args.overwrite
+    use_softlink: bool = args.use_softlink
+
+    if use_softlink:
+        raise NotImplementedError("'--use-softlink' function not yet implemented.")
+
+    for poscar_path in glob(os.path.join(root_directory, "POSCAR-*")):
+        basename = os.path.basename(poscar_path)
+        if not re.match(r"^POSCAR-[0-9]+$", basename):
+            continue
+        calc_directory = os.path.join(root_directory, basename.replace("POSCAR-", ""))
+        if os.path.exists(calc_directory):
+            if will_overwrite:
+                shutil.rmtree(calc_directory)
+            else:
+                print(
+                    f"{calc_directory} already exists. Use '--overwrite' option to remove existing directory and re-prepare inputs."
+                )
+                print("Exiting ...")
+                sys.exit(1)
+        os.makedirs(calc_directory)
+        shutil.copy(poscar_path, os.path.join(calc_directory, "POSCAR"))
+        shutil.copy(incar_path, calc_directory)
+        shutil.copy(potcar_path, calc_directory)
+        shutil.copy(kpoints_path, calc_directory)
+        if wavecar_path:
+            shutil.copy(wavecar_path, calc_directory)
+
+
+if __name__ == "__main__":
+    main()
