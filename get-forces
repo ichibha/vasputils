@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+import numpy as np
+from pymatgen.io.vasp import Vasprun
+
+from lib import process_vasprun_decorator
+
+
+def convert_force_vector_to_str(force_vector: tuple[float, float, float]):
+    return f"{force_vector[0]:+.6f} {force_vector[1]:+.6f} {force_vector[2]:+.6f}"
+
+
+@process_vasprun_decorator("Get forces")
+def main(vasprun: Vasprun):
+    force_vectors: list[list[float]] = vasprun.ionic_steps[-1]["forces"]
+    for i, force_vector in enumerate(force_vectors):
+        print(f"{i+1:3}: {convert_force_vector_to_str(force_vector)}")
+        # print(force_vector)
+
+    force_magnitudes: list[float] = [np.linalg.norm(vector) for vector in force_vectors]
+    max_force_index: int = np.argmax(force_magnitudes)
+    max_force_vector = force_vectors[max_force_index]
+    print(
+        f"Atom {max_force_index+1} has the largest force: {convert_force_vector_to_str(max_force_vector)}"
+    )
+
+
+if __name__ == "__main__":
+    main()
