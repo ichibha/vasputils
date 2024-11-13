@@ -2,6 +2,8 @@
 import argparse
 import os
 import re
+import shutil
+import sys
 from glob import glob
 
 from vasputils import prepare_phonopy_input
@@ -9,7 +11,7 @@ from vasputils import prepare_phonopy_input
 
 def main():
     parser = argparse.ArgumentParser(
-        description="prepare input files for harmonic forces calculations"
+        description="prepare input files for displaced structures for harmonic phoonon calculations"
     )
     parser.add_argument(
         "--incar",
@@ -24,15 +26,26 @@ def main():
         help="POTCAR filepath",
     )
     parser.add_argument(
-        "--kpoints",
+        "--kpoints-fc2",
         type=str,
         required=True,
-        help="KPOINTS filepath",
+        help="KPOINTS filepath for FC2",
     )
     parser.add_argument(
-        "--wavecar",
+        "--kpoints-fc3",
         type=str,
-        help="WAVECAR filepath",
+        required=True,
+        help="KPOINTS filepath for FC3",
+    )
+    parser.add_argument(
+        "--wavecar-fc2",
+        type=str,
+        help="WAVECAR filepath for FC2",
+    )
+    parser.add_argument(
+        "--wavecar-fc3",
+        type=str,
+        help="WAVECAR filepath for FC3",
     )
     parser.add_argument(
         "--directory",
@@ -48,23 +61,42 @@ def main():
     args = parser.parse_args()
     incar: str = args.incar
     potcar: str = args.potcar
-    kpoints: str = args.kpoints
-    wavecar: str = args.wavecar
+    kpoints_fc2: str = args.kpoints_fc2
+    kpoints_fc3: str = args.kpoints_fc3
+    wavecar_fc2: str = args.wavecar_fc2
+    wavecar_fc3: str = args.wavecar_fc3
     root_directory: str = args.directory
     use_softlink: bool = args.use_softlink
 
-    for poscar in sorted(glob(os.path.join(root_directory, "POSCAR-*"))):
+    # FC2の計算
+    for poscar in sorted(glob(os.path.join(root_directory, "POSCAR_FC2-*"))):
         basename = os.path.basename(poscar)
-        if not re.match(r"^POSCAR-[0-9]+$", basename):
+        if not re.match(r"^POSCAR_FC2-[0-9]+$", basename):
             continue
-        directory = os.path.join(root_directory, basename.replace("POSCAR-", ""))
+        directory = os.path.join(root_directory, basename.replace("POSCAR_", ""))
         prepare_phonopy_input(
             directory=directory,
             incar=incar,
             poscar=poscar,
             potcar=potcar,
-            kpoints=kpoints,
-            wavecar=wavecar,
+            kpoints=kpoints_fc2,
+            wavecar=wavecar_fc2,
+            use_softlink=use_softlink,
+        )
+
+    # FC3の計算
+    for poscar in sorted(glob(os.path.join(root_directory, "POSCAR-*"))):
+        basename = os.path.basename(poscar)
+        if not re.match(r"^POSCAR-[0-9]+$", basename):
+            continue
+        directory = os.path.join(root_directory, basename.replace("POSCAR-", "FC3-"))
+        prepare_phonopy_input(
+            directory=directory,
+            incar=incar,
+            poscar=poscar,
+            potcar=potcar,
+            kpoints=kpoints_fc3,
+            wavecar=wavecar_fc3,
             use_softlink=use_softlink,
         )
 

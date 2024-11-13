@@ -3,6 +3,7 @@ import argparse
 import functools
 import os
 import re
+import shutil
 from glob import glob
 
 from pymatgen.core.structure import Structure
@@ -38,25 +39,36 @@ def process_poscar_decorator(description):
     return decorator
 
 
-def get_pymatgen_structure(poscar_path: str):
-    # POSCARファイルの存在確認
-    if not os.path.exists(poscar_path):
-        raise FileNotFoundError(f"{poscar_path} not found.")
-    # POSCARを読み込む
-    try:
-        return Structure.from_file(poscar_path)
-    except Exception as e:
-        raise RuntimeError(f"Failed to read {poscar_path}: {e}")
+def search_directories(pattern: str, root_directory: str):
+    directories = [
+        os.path.abspath(path)
+        for path in glob(os.path.join(root_directory, "*"))
+        if os.path.isdir(path) and re.match(pattern, os.path.basename(path))
+    ]
+    return sorted(directories)
 
 
 def search_numbered_directories(root_directory: str):
     return search_directories("^[0-9]+$", root_directory)
 
 
-def search_directories(pattern: str, root_directory: str):
-    directories = [
-        os.path.abspath(directory)
-        for directory in glob(os.path.join(root_directory, "*"))
-        if re.match(pattern, os.path.basename(directory))
-    ]
-    return sorted(directories)
+def prepare_phonopy_input(
+    directory: str,
+    incar: str,
+    poscar: str,
+    potcar: str,
+    kpoints: str,
+    wavecar: str = None,
+    use_softlink: bool = False,
+):
+    try:
+        os.makedirs(directory)
+    except Exception as e:
+        raise Exception(f"Failed to create {directory}:", e)
+    copy = os.symlink if use_softlink else shutil.copy
+    copy(poscar, os.path.join(directory, "POSCAR"))
+    copy(incar, directory)
+    copy(potcar, directory)
+    copy(kpoints, directory)
+    if wavecar:
+        copy(wavecar, directory)

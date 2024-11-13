@@ -4,9 +4,8 @@ import argparse
 import os
 
 import numpy as np
+from pymatgen.core import Structure
 from pymatgen.io.vasp import Poscar
-
-from vasputils import get_pymatgen_structure
 
 
 def main():
@@ -28,7 +27,7 @@ def main():
     size: tuple[int, int, int] = args.size
 
     # スーパーセルを生成
-    structure = get_pymatgen_structure(poscar_path)
+    structure = Structure.from_file(poscar_path)
     supercell_structure = structure.make_supercell(np.diag(size), in_place=False)
 
     # POSCARファイルとしてスーパーセルを保存
