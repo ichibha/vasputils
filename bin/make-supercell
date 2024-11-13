@@ -6,7 +6,7 @@ import os
 import numpy as np
 from pymatgen.io.vasp import Poscar
 
-from lib import get_pymatgen_structure
+from vasputils import get_pymatgen_structure
 
 
 def main():

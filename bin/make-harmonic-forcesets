@@ -6,7 +6,7 @@ import sys
 
 from pymatgen.io.vasp.outputs import Vasprun
 
-from lib import search_numbered_directories
+from vasputils import search_numbered_directories
 
 
 def main():

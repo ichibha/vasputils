@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 
 from pymatgen.core.structure import Structure
 
-from lib import process_vasprun_decorator
+from vasputils import process_vasprun_decorator
 
 
 def get_pymatgen_structure(poscar_path: str):

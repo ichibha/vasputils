@@ -5,7 +5,7 @@ import os
 import shutil
 import sys
 
-from lib import search_numbered_directories
+from vasputils import search_numbered_directories
 
 
 def main():
