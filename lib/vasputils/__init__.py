@@ -67,8 +67,8 @@ def prepare_phonopy_input(
         raise Exception(f"Failed to create {directory}:", e)
     copy = os.symlink if use_softlink else shutil.copy
     copy(poscar, os.path.join(directory, "POSCAR"))
-    copy(incar, directory)
-    copy(potcar, directory)
-    copy(kpoints, directory)
+    copy(incar, os.path.join(directory, "INCAR"))
+    copy(potcar, os.path.join(directory, "POTCAR"))
+    copy(kpoints, os.path.join(directory, "KPOINTS"))
     if wavecar:
-        copy(wavecar, directory)
+        copy(wavecar, os.path.join(directory, "WAVECAR"))
