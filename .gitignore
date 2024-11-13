@@ -1,1 +1,14 @@
-__pycache__/lib.cpython-311.pyc
+# macOS
+Icon?
+Thumbs.db
+.DS_Store
+
+# Python
+__pycache__/
+
+# JavaScript
+node_modules/
+
+# Emacs
+*~
+\#*\#

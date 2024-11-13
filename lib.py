@@ -38,20 +38,6 @@ def process_poscar_decorator(description):
     return decorator
 
 
-# def process_directory_decorator(description):
-#     def decorator(process_poscar):
-#         @functools.wraps(process_poscar)
-#         def wrapper():
-#             parser = argparse.ArgumentParser(description=description)
-#             parser.add_argument("directory", type=str, help="directory path")
-#             args = parser.parse_args()
-#             return process_poscar(args.directory)
-
-#         return wrapper
-
-#     return decorator
-
-
 def get_pymatgen_structure(poscar_path: str):
     # POSCARファイルの存在確認
     if not os.path.exists(poscar_path):
