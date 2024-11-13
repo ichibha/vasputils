@@ -17,13 +17,12 @@ def run_bader_analysis(chgcar_filepath: str, potcar_filepath: str):
     # linesに見出しを加える
     lines.append("index, x(A), y(A), z(A), charge(e), radius(A), volume(A^3)")
 
-    # それぞれの原子についてループする
+    # 各原子のベーダー解析結果を取得しlinesに加える
     for iatom, data in enumerate(result.data):
         x, y, z = data["x"], data["y"], data["z"]  # 原子位置を取得する
         charge = result.get_partial_charge(iatom)  # イオン電荷を取得する
         min_dist = data["min_dist"]  # ベーダー半径を取得する
         atomic_vol = data["atomic_vol"]  # ベーダー体積を取得する
-        # 取得情報を加工してlinesに加える
         lines.append(f"{iatom+1}, {x}, {y}, {z}, {charge}, {min_dist}, {atomic_vol}")
 
     # linesをCSV形式でファイル出力する

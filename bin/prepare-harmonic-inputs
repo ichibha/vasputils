@@ -59,9 +59,6 @@ def main():
     will_overwrite: bool = args.overwrite
     use_softlink: bool = args.use_softlink
 
-    if use_softlink:
-        raise NotImplementedError("'--use-softlink' function not yet implemented.")
-
     for poscar_path in sorted(glob(os.path.join(root_directory, "POSCAR-*"))):
         basename = os.path.basename(poscar_path)
         if not re.match(r"^POSCAR-[0-9]+$", basename):
@@ -77,12 +74,13 @@ def main():
                 print("Exiting ...")
                 sys.exit(1)
         os.makedirs(calc_directory)
-        shutil.copy(poscar_path, os.path.join(calc_directory, "POSCAR"))
-        shutil.copy(incar_path, calc_directory)
-        shutil.copy(potcar_path, calc_directory)
-        shutil.copy(kpoints_path, calc_directory)
+        copy = os.symlink if use_softlink else shutil.copy
+        copy(poscar_path, os.path.join(calc_directory, "POSCAR"))
+        copy(incar_path, calc_directory)
+        copy(potcar_path, calc_directory)
+        copy(kpoints_path, calc_directory)
         if wavecar_path:
-            shutil.copy(wavecar_path, calc_directory)
+            copy(wavecar_path, calc_directory)
 
 
 if __name__ == "__main__":
