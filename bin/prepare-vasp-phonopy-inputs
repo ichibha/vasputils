@@ -69,7 +69,7 @@ def main():
         help="root directory of phonon calculation",
     )
     parser.add_argument(
-        "--use-softlink",
+        "--softlink",
         action="store_true",
         help="prepare inputs by softlink rather than copy",
     )
@@ -81,7 +81,7 @@ def main():
     kpoints: str = args.kpoints
     wavecar: str = args.wavecar
     root_directory: str = args.directory
-    use_softlink: bool = args.use_softlink
+    softlink: bool = args.softlink
 
     pattern = get_pattern(kind)
     if not pattern:
@@ -97,7 +97,7 @@ def main():
             potcar=potcar,
             kpoints=kpoints,
             wavecar=wavecar,
-            use_softlink=use_softlink,
+            use_softlink=softlink,
         )
 
 

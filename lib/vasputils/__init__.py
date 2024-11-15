@@ -59,13 +59,13 @@ def prepare_vasp_input(
     potcar: str,
     kpoints: str,
     wavecar: str = None,
-    use_softlink: bool = False,
+    softlink: bool = False,
 ):
     try:
         os.makedirs(directory)
     except Exception as e:
         raise Exception(f"Failed to create {directory}:", e)
-    copy = os.symlink if use_softlink else shutil.copy
+    copy = os.symlink if softlink else shutil.copy
     copy(os.path.abspath(poscar), os.path.join(directory, "POSCAR"))
     copy(os.path.abspath(incar), os.path.join(directory, "INCAR"))
     copy(os.path.abspath(potcar), os.path.join(directory, "POTCAR"))
