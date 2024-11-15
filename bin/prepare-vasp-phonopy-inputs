@@ -7,9 +7,37 @@ from glob import glob
 from vasputils import prepare_vasp_input
 
 
+def get_pattern(kind: str):
+    pattern_dict = {
+        "phonopy": "POSCAR-*",
+        "phono3py-fc2": "POSCAR_FC2-*",
+        "phono3py-fc3": "POSCAR-*",
+        "raman": "Raman-POSCAR.*.*.vasp",
+    }
+    return pattern_dict.get(kind)
+
+
+def get_dirname(poscar: str, kind: str):
+    basename = os.path.basename(poscar)
+    if kind == "phonopy":
+        return basename.replace("POSCAR", "FC2")
+    elif kind == "phono3py-fc2":
+        return basename.replace("POSCAR_", "")
+    elif kind == "phono3py-fc3":
+        return basename.replace("POSCAR", "FC3")
+    elif kind == "raman":
+        return basename.replace("POSCAR.", "")
+    else:
+        return None
+
+
 def main():
-    parser = argparse.ArgumentParser(
-        description="prepare input files for harmonic forces calculations"
+    parser = argparse.ArgumentParser(description="prepare vasp-phonon input files")
+    parser.add_argument(
+        "--kind",
+        type=str,
+        required=True,
+        choices=["phonopy", "phono3py-fc2", "phono3py-fc3", "raman"],
     )
     parser.add_argument(
         "--incar",
@@ -45,7 +73,9 @@ def main():
         action="store_true",
         help="prepare inputs by softlink rather than copy",
     )
+
     args = parser.parse_args()
+    kind: str = args.kind
     incar: str = args.incar
     potcar: str = args.potcar
     kpoints: str = args.kpoints
@@ -53,11 +83,13 @@ def main():
     root_directory: str = args.directory
     use_softlink: bool = args.use_softlink
 
-    for poscar in sorted(glob(os.path.join(root_directory, "POSCAR-*"))):
-        basename = os.path.basename(poscar)
-        if not re.match(r"^POSCAR-[0-9]+$", basename):
-            continue
-        directory = os.path.join(root_directory, basename.replace("POSCAR-", ""))
+    pattern = get_pattern(kind)
+    if not pattern:
+        print(f"Error: kind={kind} not defined.")
+        parser.print_help()
+
+    for poscar in sorted(glob(os.path.join(root_directory, pattern))):
+        directory = os.path.join(root_directory, get_dirname(poscar, kind))
         prepare_vasp_input(
             directory=directory,
             incar=incar,
