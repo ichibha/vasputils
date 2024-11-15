@@ -97,7 +97,7 @@ def main():
             potcar=potcar,
             kpoints=kpoints,
             wavecar=wavecar,
-            use_softlink=softlink,
+            softlink=softlink,
         )
 
 
