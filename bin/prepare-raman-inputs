@@ -53,11 +53,9 @@ def main():
     root_directory: str = args.directory
     use_softlink: bool = args.use_softlink
 
-    for poscar in sorted(glob(os.path.join(root_directory, "POSCAR-*"))):
-        basename = os.path.basename(poscar)
-        if not re.match(r"^POSCAR-[0-9]+$", basename):
-            continue
-        directory = os.path.join(root_directory, basename.replace("POSCAR-", ""))
+    for poscar in sorted(glob(os.path.join(root_directory, "Raman-POSCAR.*.*.vasp"))):
+        dirname = os.path.basename(poscar).replace("POSCAR.", "").replace(".vasp", "")
+        directory = os.path.join(root_directory, dirname)
         prepare_vasp_input(
             directory=directory,
             incar=incar,

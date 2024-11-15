@@ -52,7 +52,7 @@ def search_numbered_directories(root_directory: str):
     return search_directories("^[0-9]+$", root_directory)
 
 
-def prepare_phonopy_input(
+def prepare_vasp_input(
     directory: str,
     incar: str,
     poscar: str,
