@@ -54,7 +54,6 @@ def main():
     parser.add_argument(
         "--kpoints",
         type=str,
-        required=True,
         help="KPOINTS filepath",
     )
     parser.add_argument(

@@ -69,6 +69,7 @@ def prepare_vasp_input(
     copy(os.path.abspath(poscar), os.path.join(directory, "POSCAR"))
     copy(os.path.abspath(incar), os.path.join(directory, "INCAR"))
     copy(os.path.abspath(potcar), os.path.join(directory, "POTCAR"))
-    copy(os.path.abspath(kpoints), os.path.join(directory, "KPOINTS"))
+    if kpoints:
+        copy(os.path.abspath(kpoints), os.path.join(directory, "KPOINTS"))
     if wavecar:
         copy(os.path.abspath(wavecar), os.path.join(directory, "WAVECAR"))
