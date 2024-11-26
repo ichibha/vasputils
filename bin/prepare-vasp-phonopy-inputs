@@ -26,7 +26,7 @@ def get_dirname(poscar: str, kind: str):
     elif kind == "phono3py-fc3":
         return basename.replace("POSCAR", "FC3")
     elif kind == "raman":
-        return basename.replace("POSCAR.", "")
+        return basename.replace("POSCAR.", "").rstrip(".vasp")
     else:
         return None
 
