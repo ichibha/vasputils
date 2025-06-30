@@ -30,7 +30,7 @@ def main():
     # poscarファイルとして保存する
     poscar = Poscar(primitive_structure)
     base, ext = os.path.splitext(os.path.basename(poscar_path))
-    output_path = f"{base}_prim{ext}"
+    output_path = f"{base}_prim.vasp"
     print(f"Writing out primitive structure to {output_path} ...")
     poscar.write_file(output_path)
 

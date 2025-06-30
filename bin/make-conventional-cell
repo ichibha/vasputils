@@ -32,8 +32,8 @@ def main():
 
     # poscarファイルとして保存する
     poscar = Poscar(conventional_structure)
-    base, ext = os.path.splitext(os.path.basename(poscar_path))
-    output_path = f"{base}_conv{ext}"
+    base, _ = os.path.splitext(os.path.basename(poscar_path))
+    output_path = f"{base}_conv.vasp"
     print(f"Writing out conventional structure to {output_path} ...")
     poscar.write_file(output_path)
 
