@@ -20,8 +20,7 @@ def main():
     elif mp and not gamma:
         kpoints = Kpoints.monkhorst_automatic(mesh)
     else:
-        print("Flag either --gamma or --mp.")
-        sys.exit(1)
+        raise ValueError("Flag either --gamma or --mp.")
 
     print(kpoints)
 
