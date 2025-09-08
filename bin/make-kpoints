@@ -6,35 +6,24 @@ from pymatgen.io.vasp.inputs import Kpoints
 
 
 def main():
-    parser = argparse.ArgumentParser(description="make KPOINTS with automatic mesh")
-    parser.add_argument(
-        "--gamma",
-        nargs=3,
-        type=int,
-        help="gamma mesh (e.g., --gamma 4 4 4)",
-    )
-    parser.add_argument(
-        "--mp",
-        nargs=3,
-        type=int,
-        help="monkhost pack mesh (e.g., --mp 4 4 4)",
-    )
-    args = parser.parse_args()
-    gamma: tuple[int, int, int] = args.gamma
-    mp: tuple[int, int, int] = args.mp
+    parser = argparse.ArgumentParser(description="print KPOINTS with automatic mesh")
+    parser.add_argument("mesh", nargs=3, type=int, help="mesh size")
+    parser.add_argument("--gamma", action="store_true", help="use gamma mesh")
+    parser.add_argument("--mp", action="store_true", help="use monkhorst pack mesh")
+    args = vars(parser.parse_args())
+    mesh: tuple[int, int, int] = args.get("mesh")
+    gamma: bool = args.get("gamma")
+    mp: bool = args.get("mp")
 
     if gamma and not mp:
-        print(f"Writing gamma mesh {gamma[0]}x{gamma[1]}x{gamma[2]} into KPOINTS ... ")
-        kpoints = Kpoints.gamma_automatic(gamma)
-        kpoints.write_file("KPOINTS")
+        kpoints = Kpoints.gamma_automatic(mesh)
     elif mp and not gamma:
-        print(f"Writing mp mesh {gamma[0]}x{gamma[1]}x{gamma[2]} into KPOINTS ... ")
-        kpoints = Kpoints.monkhorst_automatic(mp)
-        kpoints.write_file("KPOINTS")
+        kpoints = Kpoints.monkhorst_automatic(mesh)
     else:
-        print("Provide either --gamma or --mp.")
-        print("Exiting ...")
+        print("Flag either --gamma or --mp.")
         sys.exit(1)
+
+    print(kpoints)
 
 
 if __name__ == "__main__":
