@@ -1,43 +1,53 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import re
 import subprocess
 import sys
+from glob import glob
 
 from pymatgen.io.vasp.outputs import Vasprun
 
-from vasputils import search_numbered_directories
-
 
 def main():
+    # コマンド引数を定義
     parser = argparse.ArgumentParser(
         description="make FORCE_SETS with vasprun.xml for harmonic phonon calculation"
     )
     parser.add_argument(
-        "--directory",
+        "directory",
         type=str,
+        nargs="?",
         default="./",
         help="root directory of phonon calculation",
     )
-    args = parser.parse_args()
-    root_directory = args.directory
 
-    calc_directories = search_numbered_directories(root_directory)
-    if not calc_directories:
+    # コマンド引数を読み込み
+    args = vars(parser.parse_args())
+    root_directory: str = args.get("directory")
+
+    # 変位構造の計算ディレクトリを読み込み
+    directories = sorted(
+        directory
+        for directory in glob(os.path.join(root_directory, "FC2-*"))
+        if re.match(r".*/FC2-\d+$", directory)
+    )
+    if not directories:
         raise FileNotFoundError(
-            f"Harmonic displacement directories not found at {root_directory}."
+            f"Harmonic displacement directories are not found at {root_directory}."
         )
 
+    # 変位構造の計算ディレクトリに亘るループ
     vasprun_paths: list[str] = []
-    for calc_directory in calc_directories:
-        vasprun_path = os.path.join(calc_directory, "vasprun.xml")
-        if not os.path.exists(vasprun_path):
-            raise FileNotFoundError(f"{vasprun_path} not found.")
-        try:
-            Vasprun(vasprun_path)
-        except Exception as e:
-            print(f"Cannot read {vasprun_path}: {e}")
-            sys.exit(1)
+    for directory in directories:
+        vasprun_path = os.path.join(directory, "vasprun.xml")
+        if os.path.exists(vasprun_path):
+            try:
+                Vasprun(vasprun_path)
+            except Exception as e:
+                raise FileNotFoundError(f"Cannot read {vasprun_path}: {e}")
+        else:
+            raise FileNotFoundError(f"{vasprun_path} not found")
 
         print(f"{os.path.relpath(vasprun_path)} found.")
         vasprun_paths.append(vasprun_path)
