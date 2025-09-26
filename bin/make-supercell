@@ -32,10 +32,11 @@ def main():
 
     # スーパーセルをposcar形式で保存
     supercell_poscar = Poscar(supercell_structure)
-    base, _ext = os.path.splitext(os.path.basename(poscar_path))
-    output_path = f"{base}_{size[0]}x{size[1]}x{size[2]}.vasp"
-    print(f"Writing out supercell structure to {output_path} ...")
-    supercell_poscar.write_file(output_path)
+    print(supercell_poscar)
+    # base, _ext = os.path.splitext(os.path.basename(poscar_path))
+    # output_path = f"{base}_{size[0]}x{size[1]}x{size[2]}.vasp"
+    # print(f"Writing out supercell structure to {output_path} ...")
+    # supercell_poscar.write_file(output_path)
 
 
 if __name__ == "__main__":
