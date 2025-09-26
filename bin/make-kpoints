@@ -6,22 +6,25 @@ from pymatgen.io.vasp.inputs import Kpoints
 
 
 def main():
+    # コマンド引数を定義
     parser = argparse.ArgumentParser(description="print KPOINTS with automatic mesh")
     parser.add_argument("mesh", nargs=3, type=int, help="mesh size")
     parser.add_argument("--gamma", action="store_true", help="use gamma mesh")
     parser.add_argument("--mp", action="store_true", help="use monkhorst pack mesh")
+
+    # コマンド引数を読み込み
     args = vars(parser.parse_args())
     mesh: tuple[int, int, int] = args.get("mesh")
     gamma: bool = args.get("gamma")
     mp: bool = args.get("mp")
 
+    # k点を生成、表示
     if gamma and not mp:
         kpoints = Kpoints.gamma_automatic(mesh)
     elif mp and not gamma:
         kpoints = Kpoints.monkhorst_automatic(mesh)
     else:
-        raise ValueError("Flag either --gamma or --mp.")
-
+        raise ValueError("Must use either --gamma or --mp")
     print(kpoints)
 
 
