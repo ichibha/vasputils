@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 from pymatgen.io.vasp import Vasprun
-
-from vasputils import process_vasprun_decorator
+from vasputils.decorator import process_vasprun_decorator
 
 
 def convert_force_vector_to_str(force_vector: tuple[float, float, float]):

@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import re
+import shutil
 from glob import glob
-
-from vasputils import prepare_vasp_input
 
 
 def get_pattern(kind: str):
@@ -29,6 +27,29 @@ def get_dirname(poscar: str, kind: str):
         return basename.replace("POSCAR.", "").rstrip(".vasp")
     else:
         return None
+
+
+def prepare_vasp_input(
+    directory: str,
+    incar: str,
+    poscar: str,
+    potcar: str,
+    kpoints: str,
+    wavecar: str = None,
+    softlink: bool = False,
+):
+    try:
+        os.makedirs(directory)
+    except Exception as e:
+        raise Exception(f"Failed to create {directory}:", e)
+    copy = os.symlink if softlink else shutil.copy
+    copy(os.path.abspath(poscar), os.path.join(directory, "POSCAR"))
+    copy(os.path.abspath(incar), os.path.join(directory, "INCAR"))
+    copy(os.path.abspath(potcar), os.path.join(directory, "POTCAR"))
+    if kpoints:
+        copy(os.path.abspath(kpoints), os.path.join(directory, "KPOINTS"))
+    if wavecar:
+        copy(os.path.abspath(wavecar), os.path.join(directory, "WAVECAR"))
 
 
 def main():

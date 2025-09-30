@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from pymatgen.io.vasp import Vasprun
-
-from vasputils import process_vasprun_decorator
+from vasputils.decorator import process_vasprun_decorator
 
 
 @process_vasprun_decorator("Get bandgap")
