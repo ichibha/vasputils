@@ -1,43 +1,13 @@
 #!/usr/bin/env python3
-import os
 import xml.etree.ElementTree as ET
 
-from pymatgen.core.structure import Structure
+from pymatgen.io.vasp import Vasprun
 from vasputils.decorator import process_vasprun_decorator
 
 
-def get_pymatgen_structure(poscar_path: str):
-    # POSCARファイルの存在確認
-    if not os.path.exists(poscar_path):
-        raise FileNotFoundError(f"{poscar_path} not found.")
-    # POSCARを読み込む
-    try:
-        return Structure.from_file(poscar_path)
-    except Exception as e:
-        raise RuntimeError(f"Failed to read {poscar_path}: {e}")
-
-
-def get_epsilon(vasprun_path):
-    # XMLファイルをパースし、そのルート要素を取得する
-    root = ET.parse(vasprun_path).getroot()
-
-    # XML構造内で誘電率テンソルを含むarray要素を取得する
-    epsilon_elements = root.findall(".//varray[@name='epsilon']/v")
-
-    # 抽出した誘電率テンソルを格納するための空リストを初期化する
-    epsilon_array: list[list[float]] = []
-
-    # epsilon_elementsから各行を取得し、floatリストに変換し、epsilon_arrayに追加する
-    for element in epsilon_elements:
-        epsilon_array.append(list(map(float, element.text.split())))
-
-    # 誘電率テンソルを3x3のfloat配列として返す
-    return epsilon_array
-
-
-def get_born_charges(vasprun_path):
-    # vasprun.xmlファイルをパースし、そのルート要素を取得する
-    root = ET.parse(vasprun_path).getroot()
+def get_born_charges(vasprun: Vasprun):
+    # フォールバック: XMLから直接読み取り
+    root = ET.parse(vasprun.filename).getroot()
 
     # XML構造内でボルン有効電荷テンソルを含むarray要素を取得する
     born_charge_elements_array = root.findall(".//array[@name='born_charges']/set")
@@ -60,9 +30,9 @@ def get_born_charges(vasprun_path):
 
 
 @process_vasprun_decorator("get dielectric tensor")
-def main(vasprun_path: str):
-    epsilon = get_epsilon(vasprun_path)
-    born_charges = get_born_charges(vasprun_path)
+def main(vasprun: Vasprun):
+    epsilon = vasprun.epsilon_static
+    born_charges = get_born_charges(vasprun=vasprun)
 
     print("Dielectric tensor")
     for i in range(3):
