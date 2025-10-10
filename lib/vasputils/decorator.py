@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import functools
+import warnings
 
 from pymatgen.io.vasp import Vasprun
 
@@ -13,6 +14,8 @@ def process_vasprun_decorator(description):
             parser.add_argument("vasprun_path", type=str, help="vasprun.xml path")
             args = parser.parse_args()
             vasprun = Vasprun(args.vasprun_path)
+            if not vasprun.converged:
+                warnings.warn("Calculation has not been converged.", UserWarning)
             return process_vasprun(vasprun)
 
         return wrapper
