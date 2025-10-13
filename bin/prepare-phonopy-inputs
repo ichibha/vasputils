@@ -1,32 +1,64 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import re
 import shutil
 from glob import glob
 
+RUN_TEMPLATE = """
+#!/usr/bin/env bash
 
-def get_pattern(kind: str):
-    pattern_dict = {
+i=0
+while true; do
+	# 指標を進める
+	i=$((i + 1))
+
+	# ゼロ埋めした3桁の整数としてディレクトリ名をdirectoryに代入する
+	directory=$(printf PATTERN $i) # changed
+
+	# directoryが存在しないならばループを抜ける
+	if [ ! -e $directory ]; then
+		break
+	fi
+
+	# 微小変位構造の計算ディレクトリに移動
+	cd $directory
+
+	# 計算が完了していたら何もしない
+	if [ -f OUTCAR ] && grep -q "EDIFF is reached" OUTCAR; then
+		echo "$directory: already converged."
+		cd - # 直前にいたディレクトリに移動する / 移動先を画面出力する
+		continue
+	fi
+
+	# VASPを実行する
+	mpirun vasp_std | tee vasp.out
+
+	# 直前にいたディレクトリに移動する / 移動先を画面出力する
+	cd -
+done
+"""
+
+
+def get_poscar_paths(kind: str, root_directory: str):
+    pattern = {
         "phonopy": "POSCAR-*",
         "phono3py-fc2": "POSCAR_FC2-*",
         "phono3py-fc3": "POSCAR-*",
         "raman": "Raman-POSCAR.*.*.vasp",
-    }
-    return pattern_dict.get(kind)
+    }.get(kind)
 
+    if not pattern:
+        raise ValueError(f"Invalide kind value: {kind}")
 
-def get_dirname(poscar: str, kind: str):
-    basename = os.path.basename(poscar)
-    if kind == "phonopy":
-        return basename.replace("POSCAR", "FC2")
-    elif kind == "phono3py-fc2":
-        return basename.replace("POSCAR_", "")
-    elif kind == "phono3py-fc3":
-        return basename.replace("POSCAR", "FC3")
-    elif kind == "raman":
-        return basename.replace("POSCAR.", "").rstrip(".vasp")
+    poscar_paths = sorted(glob(os.path.join(root_directory, pattern)))
+
+    if poscar_paths:
+        return poscar_paths
     else:
-        return None
+        raise FileNotFoundError(
+            f"{kind} displacement poscars are not found at {root_directory}."
+        )
 
 
 def prepare_vasp_input(
@@ -41,7 +73,8 @@ def prepare_vasp_input(
     try:
         os.makedirs(directory)
     except Exception as e:
-        raise Exception(f"Failed to create {directory}:", e)
+        raise RuntimeError(f"Failed to create {directory}:", e)
+
     copy = os.symlink if softlink else shutil.copy
     copy(os.path.abspath(poscar), os.path.join(directory, "POSCAR"))
     copy(os.path.abspath(incar), os.path.join(directory, "INCAR"))
@@ -53,6 +86,7 @@ def prepare_vasp_input(
 
 
 def main():
+    # コマンド引数を定義
     parser = argparse.ArgumentParser(description="prepare vasp-phonon input files")
     parser.add_argument(
         "--kind",
@@ -94,26 +128,24 @@ def main():
         help="prepare inputs by softlink rather than copy",
     )
 
-    args = parser.parse_args()
-    kind: str = args.kind
-    incar: str = args.incar
-    potcar: str = args.potcar
-    kpoints: str = args.kpoints
-    wavecar: str = args.wavecar
-    root_directory: str = args.directory
-    softlink: bool = args.softlink
+    # コマンド引数を取得
+    args = vars(parser.parse_args())
+    kind: str = args.get("kind")
+    incar: str = args.get("incar")
+    potcar: str = args.get("potcar")
+    kpoints: str = args.get("kpoints")
+    wavecar: str = args.get("wavecar")
+    root_directory: str = args.get("directory")
+    softlink: bool = args.get("softlink")
 
-    pattern = get_pattern(kind)
-    if not pattern:
-        print(f"Error: kind={kind} not defined.")
-        parser.print_help()
-
-    for poscar in sorted(glob(os.path.join(root_directory, pattern))):
-        directory = os.path.join(root_directory, get_dirname(poscar, kind))
+    for poscar_path in get_poscar_paths(kind=kind, root_directory=root_directory):
+        directory = os.path.join(
+            root_directory, re.sub(r"[^0-9]", "", os.path.basename(poscar_path))
+        )
         prepare_vasp_input(
             directory=directory,
             incar=incar,
-            poscar=poscar,
+            poscar=poscar_path,
             potcar=potcar,
             kpoints=kpoints,
             wavecar=wavecar,
