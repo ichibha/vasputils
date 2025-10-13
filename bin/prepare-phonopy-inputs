@@ -8,31 +8,17 @@ from glob import glob
 RUN_TEMPLATE = """
 #!/usr/bin/env bash
 
-i=0
-while true; do
-	# 指標を進める
-	i=$((i + 1))
-
-	# ゼロ埋めした3桁の整数としてディレクトリ名をdirectoryに代入する
-	directory=$(printf PATTERN $i) # changed
-
-	# directoryが存在しないならばループを抜ける
-	if [ ! -e $directory ]; then
-		break
-	fi
-
+for directory in DIRECTORIES; do
 	# 微小変位構造の計算ディレクトリに移動
 	cd $directory
 
-	# 計算が完了していたら何もしない
 	if [ -f OUTCAR ] && grep -q "EDIFF is reached" OUTCAR; then
+		# 計算が完了しているならば、何もしない
 		echo "$directory: already converged."
-		cd - # 直前にいたディレクトリに移動する / 移動先を画面出力する
-		continue
+	else
+		# 計算が完了していないならば、VASPを実行する
+		mpirun vasp_std | tee vasp.out
 	fi
-
-	# VASPを実行する
-	mpirun vasp_std | tee vasp.out
 
 	# 直前にいたディレクトリに移動する / 移動先を画面出力する
 	cd -
@@ -59,6 +45,32 @@ def get_poscar_paths(kind: str, root_directory: str):
         raise FileNotFoundError(
             f"{kind} displacement poscars are not found at {root_directory}."
         )
+
+
+def get_dirname(kind: str, poscar_path: str):
+    basename = os.path.basename(poscar_path)
+    if kind in ["phonopy", "phono3py-fc3"]:
+        return basename.removeprefix("POSCAR-")
+    elif kind == "phono3py-fc2":
+        return basename.removeprefix("POSCAR_FC2-")
+    elif kind == "raman":
+        return basename.removeprefix("Raman-POSCAR.").removesuffix(".vasp")
+    else:
+        raise ValueError(f"Invalid kind value: {kind}")
+
+
+def get_run_script_name(kind: str):
+    script_name = {
+        "phonopy": "run.sh",
+        "phono3py-fc2": "run_fc2.sh",
+        "phono3py-fc3": "run_fc3.sh",
+        "raman": "run_raman.sh",
+    }.get(kind)
+
+    if script_name:
+        return script_name
+    else:
+        raise ValueError(f"Invalid kind value: {kind}")
 
 
 def prepare_vasp_input(
@@ -138,12 +150,11 @@ def main():
     root_directory: str = args.get("directory")
     softlink: bool = args.get("softlink")
 
+    dirnames: list[str] = []
     for poscar_path in get_poscar_paths(kind=kind, root_directory=root_directory):
-        directory = os.path.join(
-            root_directory, re.sub(r"[^0-9]", "", os.path.basename(poscar_path))
-        )
+        dirname = get_dirname(kind=kind, poscar_path=poscar_path)
         prepare_vasp_input(
-            directory=directory,
+            directory=os.path.join(root_directory, dirname),
             incar=incar,
             poscar=poscar_path,
             potcar=potcar,
@@ -151,6 +162,12 @@ def main():
             wavecar=wavecar,
             softlink=softlink,
         )
+        dirnames.append(dirname)
+
+    with open(
+        os.path.join(root_directory, get_run_script_name(kind=kind)), "w"
+    ) as fout:
+        fout.write(RUN_TEMPLATE.replace("DIRECTORIES", " ".join(dirnames)))
 
 
 if __name__ == "__main__":
