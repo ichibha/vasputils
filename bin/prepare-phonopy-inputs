@@ -49,12 +49,14 @@ def get_poscar_paths(kind: str, root_directory: str):
 
 def get_dirname(kind: str, poscar_path: str):
     basename = os.path.basename(poscar_path)
-    if kind in ["phonopy", "phono3py-fc3"]:
-        return basename.removeprefix("POSCAR-")
+    if kind == "phonopy":
+        return "FC2-" + basename.removeprefix("POSCAR-")
     elif kind == "phono3py-fc2":
-        return basename.removeprefix("POSCAR_FC2-")
+        return "FC2-" + basename.removeprefix("POSCAR_FC2-")
+    elif kind == "phono3py-fc3":
+        return "FC3-" + basename.removeprefix("POSCAR-")
     elif kind == "raman":
-        return basename.removeprefix("Raman-POSCAR.").removesuffix(".vasp")
+        return "RAMAN-" + basename.removeprefix("Raman-POSCAR.").removesuffix(".vasp")
     else:
         raise ValueError(f"Invalid kind value: {kind}")
 
