@@ -1,3 +1,2 @@
 send:
-	rsync -av --delete ./ kagayaki:~/repositories/vasputils/
-# 	rsync -av --delete --exclude="__pycache__" ./ unimac1:/Volumes/work/admin/packages/vasputils/
+	rsync -av --delete ./ kagayaki:/home/ichibha/common/packages/vasputils/
