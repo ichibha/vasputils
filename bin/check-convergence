@@ -1,12 +1,25 @@
 #!/usr/bin/env python3
+import argparse
+
 from pymatgen.io.vasp import Vasprun
-from vasputils.decorator import process_vasprun_decorator
 
 
-@process_vasprun_decorator("Check convergence")
-def main(vasprun: Vasprun):
-    print(f"SCF steps converged: {vasprun.converged_electronic}")
-    print(f"Ionic steps converged: {vasprun.converged_ionic}")
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("vasprun_paths", type=str, nargs="+")
+    args = vars(parser.parse_args())
+    vasprun_paths: list[str] = args["vasprun_paths"]
+
+    for vasprun_path in vasprun_paths:
+        try:
+            vasprun = Vasprun(vasprun_path)
+        except Exception as e:
+            print(f"Failed to load {vasprun_path}: {e}")
+            continue
+
+        if not vasprun.converged:
+            print(f"Not converged: {vasprun_path}")
+            continue
 
 
 if __name__ == "__main__":
