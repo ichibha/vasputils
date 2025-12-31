@@ -50,8 +50,6 @@ def main():
     if use_phonopy:
         labels = [f"${l}$" if "\\" in l else l for l in labels]
         points = [[str(Fraction(x).limit_denominator(8)) for x in p] for p in points]
-        num_band_points = num_intervals * (len(labels) - 1)
-        print(f"BAND_POINTS = {num_band_points}")
         print("BAND_LABELS = " + " ".join(labels))
         print("BAND = " + "   ".join(" ".join(list(point)) for point in points))
 
