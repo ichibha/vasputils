@@ -11,15 +11,18 @@ def main():
     vasprun_paths: list[str] = args["vasprun_paths"]
 
     for vasprun_path in vasprun_paths:
+        print(vasprun_path, end=": ")
+
         try:
             vasprun = Vasprun(vasprun_path)
         except Exception as e:
-            print(f"Failed to load {vasprun_path}: {e}")
+            print(f"Failed to load vasprun.xml: {e}")
             continue
 
-        if not vasprun.converged:
-            print(f"Not converged: {vasprun_path}")
-            continue
+        if vasprun.converged:
+            print("Converged")
+        else:
+            print("Not converged")
 
 
 if __name__ == "__main__":
