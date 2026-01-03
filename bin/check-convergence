@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from pathlib import Path
 
 from pymatgen.io.vasp import Vasprun
 
@@ -8,15 +9,19 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("vasprun_paths", type=str, nargs="+")
     args = vars(parser.parse_args())
-    vasprun_paths: list[str] = args["vasprun_paths"]
+    vasprun_paths = list(map(Path, args.get("vasprun_paths")))
 
     for vasprun_path in vasprun_paths:
         print(vasprun_path, end=": ")
 
+        if not vasprun_path.exists():
+            print("Not found")
+            continue
+
         try:
             vasprun = Vasprun(vasprun_path)
         except Exception as e:
-            print(f"Failed to load vasprun.xml: {e}")
+            print(f"Failed to load: {e}")
             continue
 
         if vasprun.converged:
