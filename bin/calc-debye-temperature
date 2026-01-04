@@ -4,20 +4,20 @@ import argparse
 import scipy.constants as const
 
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("debye_frequency_thz", type=float)
+    args = vars(parser.parse_args())
+    debye_frequency_thz: float = args.get("debye_frequency_thz")
+
+    debye_temperature = calculate_debye_temperature(debye_frequency_thz)
+    print(f"Debye temperature: {debye_temperature:.4f} K")
+
+
 def calculate_debye_temperature(debye_frequency_thz: float):
     debye_frequency_hz = debye_frequency_thz * 1e12
     debye_temperature = const.h * debye_frequency_hz / const.Boltzmann
     return debye_temperature
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Calculate Debye temperature (K)")
-    parser.add_argument("debye_frequency_thz", type=float, help="Debye frequency (THz)")
-    args = parser.parse_args()
-    debye_frequency_thz: float = args.debye_frequency_thz
-
-    debye_temperature = calculate_debye_temperature(debye_frequency_thz)
-    print(f"Debye temperature: {debye_temperature:.4f} K")
 
 
 if __name__ == "__main__":

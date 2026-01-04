@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
-import sys
+from pathlib import Path
 
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp import Poscar
@@ -10,32 +9,29 @@ from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 
 def main():
-    # オプション引数を読み込む
-    parser = argparse.ArgumentParser(
-        description="convert given poscar to conventional cell poscar"
-    )
-    parser.add_argument("poscar_path", type=str, help="POSCAR filepath")
-    parser.add_argument(
-        "--tolerance",
-        type=float,
-        default=0.25,
-        help="tolerance for finding the conventional cell (default: 0.25)",
-    )
-    args = parser.parse_args()
-    poscar_path: str = args.poscar_path
-    tolerance: float = args.tolerance
+    # コマンド引数を定義
+    parser = argparse.ArgumentParser()
+    parser.add_argument("poscar_path", type=str)
+    parser.add_argument("--symprec", type=float)
 
-    # コンベンショナル
+    # コマンド引数を取得
+    args = vars(parser.parse_args())
+    poscar_path = Path(args.get("poscar_path"))
+    symprec: float = args.get("symprec")
+
+    # POSCARを読込
     structure = Structure.from_file(poscar_path)
-    sga = SpacegroupAnalyzer(structure, symprec=tolerance)
+
+    # 便宜胞に変換
+    if symprec is None:
+        kwargs = dict()
+    else:
+        kwargs = dict(symprec=symprec)
+    sga = SpacegroupAnalyzer(structure, **kwargs)
     conventional_structure = sga.get_conventional_standard_structure()
 
-    # poscarファイルとして保存する
-    poscar = Poscar(conventional_structure)
-    base, _ = os.path.splitext(os.path.basename(poscar_path))
-    output_path = f"{base}_conv.vasp"
-    print(f"Writing out conventional structure to {output_path} ...")
-    poscar.write_file(output_path)
+    # 便宜胞を表示
+    print(Poscar(conventional_structure))
 
 
 if __name__ == "__main__":

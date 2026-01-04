@@ -1,49 +1,64 @@
 #!/usr/bin/env python3
-
 import argparse
 import sys
 from pathlib import Path
 
-from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.core.structure import Structure
 from pymatgen.io.vasp import Poscar
 
 
 def main():
     # コマンド引数を定義
-    parser = argparse.ArgumentParser(
-        description="convert given poscar to primitive cell poscar"
-    )
-    parser.add_argument("poscar_path", type=str, help="POSCAR path")
-    parser.add_argument(
-        "--tolerance",
-        type=float,
-        help="Tolerance for each coordinate of a particular site in Angstroms in finding the pritimive cell.",
-    )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("poscar_path", type=str)
+    parser.add_argument("--tolerance", type=float)
 
-    # コマンド引数を読み込み
+    # コマンド引数を取得
     args = vars(parser.parse_args())
     poscar_path = Path(args.get("poscar_path"))
     tolerance: float = args.get("tolerance")
 
-    # POSCARから構造を取得
+    # POSCARを読込
     structure = Structure.from_file(poscar_path)
 
-    # 構造を単位胞に変換
-    kwargs = {}
-    if tolerance is not None:
-        kwargs["tolerance"] = tolerance
-
+    # 単位胞に変換
+    if tolerance is None:
+        kwargs = dict()
+    else:
+        kwargs = dict(tolerance=tolerance)
     primitive_structure = structure.get_primitive_structure(**kwargs)
 
-    matcher = StructureMatcher(primitive_cell=False, attempt_supercell=False)
-    if matcher.fit(structure, primitive_structure):
-        # 所与の構造が既に単位胞である旨を表示
-        print(f"{poscar_path.name} is already primitive cell.", file=sys.stderr)
-        return
+    # structureと元素の並びが一致するように、primitive_structureをソート
+    primitive_structure = sort_structure_by_reference(
+        reference_structure=structure, target_structure=primitive_structure
+    )
 
-    # 単位胞をPOSCAR形式で標準出力
+    # 入力構造が既に単位胞であるならば、その旨を表示
+    if len(primitive_structure) == len(structure):
+        print(f"[INFO] {poscar_path} is already primitive cell.", file=sys.stderr)
+
+    # 単位胞を出力
     print(Poscar(primitive_structure))
+
+
+def sort_structure_by_reference(
+    reference_structure: Structure,
+    target_structure: Structure,
+):
+    # reference の元素順（重複なし・出現順）
+    element_order = []
+    for site in reference_structure:
+        el = site.species_string
+        if el not in element_order:
+            element_order.append(el)
+
+    # 並び替え用辞書
+    order_map = {el: i for i, el in enumerate(element_order)}
+
+    # sort
+    return target_structure.get_sorted_structure(
+        key=lambda site: order_map[site.species_string]
+    )
 
 
 if __name__ == "__main__":

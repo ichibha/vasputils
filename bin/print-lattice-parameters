@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+import argparse
+
+from pymatgen.core import Structure
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("poscar_paths", type=str, nargs="+")
+    args = vars(parser.parse_args())
+    poscar_paths = args.get("poscar_paths")
+
+    for poscar_path in poscar_paths:
+        print(f"{poscar_path}:")
+        print_lattice_parameters(poscar_path)
+        print()
+
+
+def print_lattice_parameters(poscar_path):
+    lattice = Structure.from_file(poscar_path).lattice
+    print(f"  {'a':6} = {lattice.a:.4f} Å")
+    print(f"  {'b':6} = {lattice.b:.4f} Å")
+    print(f"  {'c':6} = {lattice.c:.4f} Å")
+    print(f"  {'alpha':6} = {lattice.alpha:.4f} degrees")
+    print(f"  {'beta':6} = {lattice.beta:.4f} degrees")
+    print(f"  {'gamma':6} = {lattice.gamma:.4f} degrees")
+    print(f"  {'volume':6} = {lattice.volume:.4f} Å^3")
+
+
+if __name__ == "__main__":
+    main()

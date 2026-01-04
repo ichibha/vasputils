@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-
 import argparse
-import os
 
 import numpy as np
 from pymatgen.core import Structure
@@ -10,33 +8,23 @@ from pymatgen.io.vasp import Poscar
 
 def main():
     # コマンド引数を定義
-    parser = argparse.ArgumentParser(
-        description="convert given poscar to supercell poscar"
-    )
-    parser.add_argument("poscar_path", type=str, help="POSCAR path")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("poscar_path", type=str)
     parser.add_argument(
-        "--size",
-        type=int,
-        nargs=3,
-        required=True,
-        metavar=("a", "b", "c"),
-        help="supercell size as 3 integers for a, b, c dimensions",
+        "--size", type=int, nargs=3, required=True, metavar=("a", "b", "c")
     )
+
+    # コマンド引数を取得
     args = vars(parser.parse_args())
     poscar_path: str = args.get("poscar_path")
     size: tuple[int, int, int] = args.get("size")
 
     # スーパーセルを生成
     structure = Structure.from_file(poscar_path)
-    supercell_structure = structure.make_supercell(np.diag(size), in_place=False)
+    super_structure = structure.make_supercell(np.diag(size), in_place=False)
 
-    # スーパーセルをposcar形式で保存
-    supercell_poscar = Poscar(supercell_structure)
-    print(supercell_poscar)
-    # base, _ext = os.path.splitext(os.path.basename(poscar_path))
-    # output_path = f"{base}_{size[0]}x{size[1]}x{size[2]}.vasp"
-    # print(f"Writing out supercell structure to {output_path} ...")
-    # supercell_poscar.write_file(output_path)
+    # スーパーセルをPOSCAR形式で表示
+    print(Poscar(super_structure))
 
 
 if __name__ == "__main__":

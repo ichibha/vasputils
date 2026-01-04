@@ -7,19 +7,11 @@ from pymatgen.io.vasp import Vasprun
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("vasprun_paths", type=str, nargs="+")
+    parser.add_argument("vasprun_paths", type=str, nargs="+", help="vasprun.xml paths")
     args = vars(parser.parse_args())
     vasprun_paths = list(map(Path, args.get("vasprun_paths")))
 
     for vasprun_path in vasprun_paths:
-        print(f"{vasprun_path}: {get_status(vasprun_path)}")
-
-
-def get_status(vasprun_path: Path):
-    if not vasprun_path.exists():
-        return "Not found"
-
-    try:
         vasprun = Vasprun(
             vasprun_path,
             parse_dos=False,
@@ -27,15 +19,7 @@ def get_status(vasprun_path: Path):
             parse_projected_eigen=False,
             parse_potcar_file=False,
         )
-    except Exception as e:
-        return f"Failed to load vasprun.xml: {e}"
-
-    if not vasprun.converged_electronic:
-        return "Electronic loop is not converged"
-    elif not vasprun.converged_ionic:
-        return "Ionic loop is not converged"
-    else:
-        return "Converged"
+        print(vasprun.kpoints)
 
 
 if __name__ == "__main__":

@@ -1,58 +1,51 @@
 #!/usr/bin/env python3
 import argparse
-import os
+from pathlib import Path
 
-
-def run_bader_analysis(chgcar_filepath: str, potcar_filepath: str):
-    # Bader解析を実行する
-    from pymatgen.command_line.bader_caller import BaderAnalysis
-
-    result = BaderAnalysis(
-        chgcar_filename=chgcar_filepath, potcar_filename=potcar_filepath
-    )
-
-    # 出力する文字列配列を初期化する
-    lines: list[str] = []
-
-    # linesに見出しを加える
-    lines.append("index, x(A), y(A), z(A), charge(e), radius(A), volume(A^3)")
-
-    # 各原子のベーダー解析結果を取得しlinesに加える
-    for iatom, data in enumerate(result.data):
-        x, y, z = data["x"], data["y"], data["z"]  # 原子位置を取得する
-        charge = result.get_partial_charge(iatom)  # イオン電荷を取得する
-        min_dist = data["min_dist"]  # ベーダー半径を取得する
-        atomic_vol = data["atomic_vol"]  # ベーダー体積を取得する
-        lines.append(f"{iatom+1}, {x}, {y}, {z}, {charge}, {min_dist}, {atomic_vol}")
-
-    # linesをCSV形式でファイル出力する
-    with open("bader_analysis.csv", "w") as fout:
-        fout.writelines(line + "\n" for line in lines)
-
-    # linesを画面出力する
-    for line in lines:
-        print(line)
+from pymatgen.command_line.bader_caller import BaderAnalysis
 
 
 def main():
-    # コマンド引数としてCHGCARとPOTCARを読み込む
-    parser = argparse.ArgumentParser(description="Bader charges calculator for VASP")
-    parser.add_argument(
-        "--chgcar",
-        type=str,
-        required=True,
-        help="provide CHGCAR filepath",
+    # コマンド引数を定義
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--chgcar", type=str, required=True)
+    parser.add_argument("--potcar", type=str, required=True)
+
+    # コマンド引数を取得
+    args = vars(parser.parse_args())
+    chgcar_path = Path(args.get("chgcar"))
+    potcar_path = Path(args.get("potcar"))
+
+    # ベーダー解析を実行
+    print_results_of_bader_analysis(chgcar_path, potcar_path)
+
+
+def print_results_of_bader_analysis(chgcar_path: str, potcar_path: str):
+    # ベーダー解析の結果を取得
+    result = BaderAnalysis(
+        chgcar_filename=Path.resolve(chgcar_path),
+        potcar_filename=Path.resolve(potcar_path),
     )
-    parser.add_argument(
-        "--potcar",
-        type=str,
-        required=True,
-        help="provide POTCAR filepath",
-    )
-    args = parser.parse_args()
-    chgcar_filepath: str = os.path.abspath(args.chgcar)
-    potcar_filepath: str = os.path.abspath(args.potcar)
-    run_bader_analysis(chgcar_filepath, potcar_filepath)
+
+    # ヘッダー
+    lines: list[str] = ["# index, x(A), y(A), z(A), charge(e), radius(A), volume(A^3)"]
+
+    # 原子毎のベーダー電荷等
+    for iatom, data in enumerate(result.data):
+        x, y, z = data["x"], data["y"], data["z"]  # 原子位置
+        charge = result.get_partial_charge(iatom)  # ベーダー電荷
+        min_dist = data["min_dist"]  # ベーダー半径
+        atomic_vol = data["atomic_vol"]  # ベーダー体積
+        lines.append(
+            f"{iatom+1:3},{x:+11.6f},{y:+11.6f},{z:+11.6f},{charge:+11.6f},{min_dist:+10.5f},{atomic_vol:10.5f}"
+        )
+
+    # CSV形式でファイル出力
+    with open("bader_analysis.csv", "w") as fout:
+        fout.writelines("\n".join(lines) + "\n")
+
+    # 標準出力
+    print("\n".join(lines))
 
 
 if __name__ == "__main__":

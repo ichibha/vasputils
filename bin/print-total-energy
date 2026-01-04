@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+
+from vasputils import get_fu, get_total_energy
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("vasprun_paths", type=str, nargs="+", help="vasprun.xml paths")
+    args = vars(parser.parse_args())
+    vasprun_paths = list(map(Path, args.get("vasprun_paths")))
+
+    for vasprun_path in vasprun_paths:
+        total_energy = get_total_energy(vasprun_path)
+        total_energy_per_fu = total_energy / get_fu(vasprun_path)
+        print(f"{vasprun_path}: {total_energy:.8f} eV, {total_energy_per_fu:.8f} eV/fu")
+
+
+if __name__ == "__main__":
+    main()

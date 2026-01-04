@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+
+from vasputils import get_force_magnitudes, get_forces
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("vasprun_paths", type=str, nargs="+", help="vasprun.xml paths")
+    args = vars(parser.parse_args())
+    vasprun_paths = list(map(Path, args.get("vasprun_paths")))
+
+    for vasprun_path in vasprun_paths:
+        print(f"{vasprun_path}:")
+        print_forces(vasprun_path)
+        print()
+
+
+def print_forces(vasprun_path: Path):
+    forces = get_forces(vasprun_path)
+    for i, force in enumerate(forces):
+        print(f"  {i+1:3}: {force[0]:+.3e}  {force[1]:+.3e}  {force[2]:+.3e}")
+
+    magnitudes = get_force_magnitudes(vasprun_path)
+    index = magnitudes.argmax()
+    magnitude = magnitudes[index]
+    print(f"  Atom {index+1} has the largest force magnitude {magnitude} eV/A")
+
+
+if __name__ == "__main__":
+    main()

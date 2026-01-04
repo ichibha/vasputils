@@ -12,14 +12,6 @@ def main():
     vasprun_paths = list(map(Path, args.get("vasprun_paths")))
 
     for vasprun_path in vasprun_paths:
-        print(f"{vasprun_path}: {get_status(vasprun_path)}")
-
-
-def get_status(vasprun_path: Path):
-    if not vasprun_path.exists():
-        return "Not found"
-
-    try:
         vasprun = Vasprun(
             vasprun_path,
             parse_dos=False,
@@ -27,15 +19,8 @@ def get_status(vasprun_path: Path):
             parse_projected_eigen=False,
             parse_potcar_file=False,
         )
-    except Exception as e:
-        return f"Failed to load vasprun.xml: {e}"
-
-    if not vasprun.converged_electronic:
-        return "Electronic loop is not converged"
-    elif not vasprun.converged_ionic:
-        return "Ionic loop is not converged"
-    else:
-        return "Converged"
+        nelectrons = vasprun.parameters["NELECT"]
+        print(f"{vasprun_path}: {nelectrons}")
 
 
 if __name__ == "__main__":
