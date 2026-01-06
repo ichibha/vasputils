@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 
-from pymatgen.io.vasp import Vasprun
+from vasputils import get_status
 
 
 def main():
@@ -13,29 +13,6 @@ def main():
 
     for vasprun_path in vasprun_paths:
         print(f"{vasprun_path}: {get_status(vasprun_path)}")
-
-
-def get_status(vasprun_path: Path):
-    if not vasprun_path.exists():
-        return "Not found"
-
-    try:
-        vasprun = Vasprun(
-            vasprun_path,
-            parse_dos=False,
-            parse_eigen=False,
-            parse_projected_eigen=False,
-            parse_potcar_file=False,
-        )
-    except Exception as e:
-        return f"Failed to load vasprun.xml: {e}"
-
-    if not vasprun.converged_electronic:
-        return "Electronic loop is not converged"
-    elif not vasprun.converged_ionic:
-        return "Ionic loop is not converged"
-    else:
-        return "Converged"
 
 
 if __name__ == "__main__":

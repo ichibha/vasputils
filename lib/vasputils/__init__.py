@@ -10,15 +10,25 @@ from pymatgen.io.vasp import Vasprun
 
 
 def is_converged(vasprun_path: Path) -> bool:
+    status = get_status(vasprun_path)
+    return True if status == "Converged" else False
+
+
+def get_status(vasprun_path: Path):
     if not vasprun_path.exists():
-        return False
+        return "Not found"
 
     try:
         vasprun = Vasprun(vasprun_path)
-    except:
-        return False
+    except Exception as e:
+        return f"Failed to load vasprun.xml: {e}"
 
-    return vasprun.converged
+    if not vasprun.converged_electronic:
+        return "Electronic loop is not converged"
+    elif not vasprun.converged_ionic:
+        return "Ionic loop is not converged"
+    else:
+        return "Converged"
 
 
 def get_fu(vasprun_path: Path):

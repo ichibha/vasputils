@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 
-from vasputils import get_fu, get_total_energy
+from vasputils import get_fu, get_status, get_total_energy
 
 
 def main():
@@ -12,9 +12,13 @@ def main():
     vasprun_paths = list(map(Path, args.get("vasprun_paths")))
 
     for vasprun_path in vasprun_paths:
-        total_energy = get_total_energy(vasprun_path)
-        total_energy_per_fu = total_energy / get_fu(vasprun_path)
-        print(f"{vasprun_path}: {total_energy:.8f} eV, {total_energy_per_fu:.8f} eV/fu")
+        print(vasprun_path, end=": ")
+        try:
+            total_energy = get_total_energy(vasprun_path)
+            total_energy_per_fu = total_energy / get_fu(vasprun_path)
+            print(f"{total_energy:.8f} eV, {total_energy_per_fu:.8f} eV/fu")
+        except:
+            print(get_status(vasprun_path))
 
 
 if __name__ == "__main__":
