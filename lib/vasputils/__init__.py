@@ -14,13 +14,7 @@ def is_converged(vasprun_path: Path) -> bool:
         return False
 
     try:
-        vasprun = Vasprun(
-            vasprun_path,
-            parse_dos=False,
-            parse_eigen=False,
-            parse_projected_eigen=False,
-            parse_potcar_file=False,
-        )
+        vasprun = Vasprun(vasprun_path)
     except:
         return False
 
@@ -28,10 +22,9 @@ def is_converged(vasprun_path: Path) -> bool:
 
 
 def get_fu(vasprun_path: Path):
-    atoms = read(vasprun_path)
-    counts = Counter(atoms.get_chemical_symbols())
-    fu = reduce(gcd, counts.values())
-    return fu
+    vasprun = Vasprun(vasprun_path)
+    comp = vasprun.final_structure.composition
+    return comp.num_atoms / comp.reduced_composition.num_atoms
 
 
 def get_total_energy(vasprun_path: Path) -> float:
