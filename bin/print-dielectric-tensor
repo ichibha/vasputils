@@ -19,13 +19,7 @@ def main():
 
 
 def print_dielectric_tensor(vasprun_path):
-    vasprun = Vasprun(
-        vasprun_path,
-        parse_dos=False,
-        parse_eigen=False,
-        parse_projected_eigen=False,
-        parse_potcar_file=False,
-    )
+    vasprun = Vasprun(vasprun_path)
     epsilon = vasprun.epsilon_static
     for i in range(3):
         for j in range(3):

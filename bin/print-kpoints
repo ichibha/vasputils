@@ -12,13 +12,7 @@ def main():
     vasprun_paths = list(map(Path, args.get("vasprun_paths")))
 
     for vasprun_path in vasprun_paths:
-        vasprun = Vasprun(
-            vasprun_path,
-            parse_dos=False,
-            parse_eigen=False,
-            parse_projected_eigen=False,
-            parse_potcar_file=False,
-        )
+        vasprun = Vasprun(vasprun_path)
         print(vasprun.kpoints)
 
 
