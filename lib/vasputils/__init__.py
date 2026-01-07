@@ -1,34 +1,41 @@
 #!/usr/bin/env python3
-from collections import Counter
-from functools import reduce
-from math import gcd
 from pathlib import Path
 
 import numpy as np
 from ase.io import read
+from pymatgen.core import Structure
 from pymatgen.io.vasp import Vasprun
+from vasputils._status import Status
 
 
 def is_converged(vasprun_path: Path) -> bool:
     status = get_status(vasprun_path)
-    return True if status == "Converged" else False
+
+    if status == Status.CONVERGED:
+        return True
+    elif status == Status.IS_DIRECTORY:
+        raise ValueError(f"{vasprun_path} is directory, not vasprun.xml.")
+    else:
+        return False
 
 
 def get_status(vasprun_path: Path):
     if not vasprun_path.exists():
-        return "Not found"
+        return Status.NOT_FOUND
+    elif vasprun_path.is_dir():
+        return Status.IS_DIRECTORY
 
     try:
         vasprun = Vasprun(vasprun_path)
-    except Exception as e:
-        return f"Failed to load vasprun.xml: {e}"
+    except Exception:
+        return Status.LOAD_FAILED
 
     if not vasprun.converged_electronic:
-        return "Electronic loop is not converged"
+        return Status.ELECTRONIC_NOT_CONVERGED
     elif not vasprun.converged_ionic:
-        return "Ionic loop is not converged"
+        return Status.IONIC_NOT_CONVERGED
     else:
-        return "Converged"
+        return Status.CONVERGED
 
 
 def get_fu(vasprun_path: Path):
