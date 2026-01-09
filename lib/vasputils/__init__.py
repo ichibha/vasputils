@@ -8,15 +8,24 @@ from pymatgen.io.vasp import Vasprun
 from vasputils._status import Status
 
 
-def is_converged(vasprun_path: Path) -> bool:
-    status = get_status(vasprun_path)
+def is_converged(_vasprun_path_or_directory: Path):
+    if _vasprun_path_or_directory.is_dir():
+        vasprun_path = _vasprun_path_or_directory / "vasprun.xml"
+    else:
+        vasprun_path = _vasprun_path_or_directory
 
+    status = get_status(vasprun_path)
     if status == Status.CONVERGED:
         return True
     elif status == Status.IS_DIRECTORY:
         raise ValueError(f"{vasprun_path} is directory, not vasprun.xml.")
     else:
         return False
+
+
+def are_forces_converged(vasprun_path: Path, threshold: float):
+    force_magnitudes = get_force_magnitudes(vasprun_path)
+    return force_magnitudes.max() <= threshold
 
 
 def get_status(vasprun_path: Path):
