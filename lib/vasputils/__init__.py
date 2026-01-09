@@ -60,3 +60,7 @@ def get_force_magnitudes(vasprun_path: Path) -> np.ndarray:
     forces = get_forces(vasprun_path)
     magnitudes = np.linalg.norm(forces, axis=1)
     return magnitudes
+
+
+def get_lattice(poscar_path: Path):
+    return Structure.from_file(poscar_path).lattice
