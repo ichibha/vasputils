@@ -8,12 +8,7 @@ from pymatgen.io.vasp import Vasprun
 from vasputils._status import Status
 
 
-def is_converged(_vasprun_path_or_directory: Path):
-    if _vasprun_path_or_directory.is_dir():
-        vasprun_path = _vasprun_path_or_directory / "vasprun.xml"
-    else:
-        vasprun_path = _vasprun_path_or_directory
-
+def is_converged(vasprun_path: Path):
     status = get_status(vasprun_path)
     if status == Status.CONVERGED:
         return True
