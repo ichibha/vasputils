@@ -17,8 +17,6 @@ def is_converged(_vasprun_path_or_directory: Path):
     status = get_status(vasprun_path)
     if status == Status.CONVERGED:
         return True
-    elif status == Status.IS_DIRECTORY:
-        raise ValueError(f"{vasprun_path} is directory, not vasprun.xml.")
     else:
         return False
 
@@ -31,8 +29,6 @@ def are_forces_converged(vasprun_path: Path, threshold: float):
 def get_status(vasprun_path: Path):
     if not vasprun_path.exists():
         return Status.NOT_FOUND
-    elif vasprun_path.is_dir():
-        return Status.IS_DIRECTORY
 
     try:
         vasprun = Vasprun(vasprun_path)
