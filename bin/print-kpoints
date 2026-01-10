@@ -7,13 +7,11 @@ from pymatgen.io.vasp import Vasprun
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("vasprun_paths", type=str, nargs="+", help="vasprun.xml paths")
+    parser.add_argument("vasprun_path", type=str, help="vasprun.xml Path")
     args = vars(parser.parse_args())
-    vasprun_paths = list(map(Path, args.get("vasprun_paths")))
-
-    for vasprun_path in vasprun_paths:
-        vasprun = Vasprun(vasprun_path)
-        print(vasprun.kpoints)
+    vasprun_path = Path(args.get("vasprun_path"))
+    vasprun = Vasprun(vasprun_path)
+    print(vasprun.kpoints)
 
 
 if __name__ == "__main__":

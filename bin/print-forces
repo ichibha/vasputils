@@ -2,18 +2,28 @@
 import argparse
 from pathlib import Path
 
-from vasputils import get_force_magnitudes, get_forces
+from vasputils import (
+    add_vasprun_paths_argument,
+    cast_vasprun_paths,
+    get_force_magnitudes,
+    get_forces,
+    get_status,
+    is_converged,
+)
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("vasprun_paths", type=str, nargs="+", help="vasprun.xml paths")
+    add_vasprun_paths_argument(parser)
     args = vars(parser.parse_args())
-    vasprun_paths = list(map(Path, args.get("vasprun_paths")))
+    vasprun_paths = cast_vasprun_paths(args.get("vasprun_paths"))
 
     for vasprun_path in vasprun_paths:
         print(f"{vasprun_path}:")
-        print_forces(vasprun_path)
+        if is_converged(vasprun_path):
+            print_forces(vasprun_path)
+        else:
+            print(get_status(vasprun_path))
         print()
 
 

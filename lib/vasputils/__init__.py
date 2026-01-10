@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+from argparse import ArgumentParser
+from os import PathLike
 from pathlib import Path
+from typing import Iterable
 
 import numpy as np
 from ase.io import read
@@ -64,3 +67,16 @@ def get_force_magnitudes(vasprun_path: Path) -> np.ndarray:
 
 def get_lattice(poscar_path: Path):
     return Structure.from_file(poscar_path).lattice
+
+
+def cast_vasprun_paths(vasprun_paths: Iterable[PathLike]):
+    return [p / "vasprun.xml" if p.is_dir() else p for p in map(Path, vasprun_paths)]
+
+
+def add_vasprun_paths_argument(parser: ArgumentParser):
+    parser.add_argument(
+        "vasprun_paths",
+        type=str,
+        nargs="+",
+        help="Paths of vasprun.xml or directory containing vasprun.xml",
+    )

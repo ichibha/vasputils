@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 import argparse
-from pathlib import Path
 
-from vasputils import get_status
+from vasputils import add_vasprun_paths_argument, cast_vasprun_paths, get_status
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("vasprun_paths", type=str, nargs="+")
+    add_vasprun_paths_argument(parser)
     args = vars(parser.parse_args())
-    vasprun_paths = list(map(Path, args.get("vasprun_paths")))
+    vasprun_paths = cast_vasprun_paths(args.get("vasprun_paths"))
 
     for vasprun_path in vasprun_paths:
         print(f"{vasprun_path}: {get_status(vasprun_path)}")
