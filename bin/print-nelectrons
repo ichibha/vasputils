@@ -4,6 +4,8 @@ from pathlib import Path
 
 from pymatgen.io.vasp import Vasprun
 
+from vasputils import get_status, is_converged
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -12,9 +14,13 @@ def main():
     vasprun_paths = list(map(Path, args.get("vasprun_paths")))
 
     for vasprun_path in vasprun_paths:
-        vasprun = Vasprun(vasprun_path)
-        nelectrons = vasprun.parameters["NELECT"]
-        print(f"{vasprun_path}: {nelectrons}")
+        print(vasprun_path, end=": ")
+        if is_converged(vasprun_path):
+            vasprun = Vasprun(vasprun_path)
+            nelectrons = vasprun.parameters["NELECT"]
+            print(f"{nelectrons}")
+        else:
+            print(get_status(vasprun_path))
 
 
 if __name__ == "__main__":

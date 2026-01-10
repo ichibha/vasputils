@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 
-from vasputils import get_fu, get_status, get_total_energy
+from vasputils import get_fu, get_status, get_total_energy, is_converged
 
 
 def main():
@@ -13,11 +13,11 @@ def main():
 
     for vasprun_path in vasprun_paths:
         print(vasprun_path, end=": ")
-        try:
+        if is_converged(vasprun_path):
             total_energy = get_total_energy(vasprun_path)
             total_energy_per_fu = total_energy / get_fu(vasprun_path)
             print(f"{total_energy:.8f} eV, {total_energy_per_fu:.8f} eV/fu")
-        except:
+        else:
             print(get_status(vasprun_path))
 
 

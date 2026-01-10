@@ -20,7 +20,7 @@ def main():
 
 
 def print_lattice_parameters(poscar_path: Path):
-    lattice = get_lattice(poscar_path)  # Structure.from_file(poscar_path).lattice
+    lattice = get_lattice(poscar_path)
     print(f"  {'a':6} = {lattice.a:.4f} Å")
     print(f"  {'b':6} = {lattice.b:.4f} Å")
     print(f"  {'c':6} = {lattice.c:.4f} Å")
