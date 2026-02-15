@@ -5,7 +5,7 @@ import re
 import subprocess
 from glob import glob
 
-from pymatgen.io.vasp.outputs import Vasprun
+from vasputils import get_vasprun
 
 
 def get_directories(kind: str, root_directory: str):
@@ -76,7 +76,7 @@ def main():
 
         # vasprun.xmlを正しく読み込むことができるか検証
         try:
-            vasprun = Vasprun(vasprun_path)
+            vasprun = get_vasprun(vasprun_path)
         except Exception as e:
             print(f"Cannot read {vasprun_path}: {e}")
             has_errors = True

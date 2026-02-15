@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 from argparse import ArgumentParser
 from os import PathLike
 from pathlib import Path
@@ -9,6 +10,22 @@ from ase.io import read
 from pymatgen.core import Structure
 from pymatgen.io.vasp import Vasprun
 from vasputils._status import Status
+
+
+def get_vasprun(
+    vasprun_path: Path,
+    parse_dos=False,
+    parse_eigen=False,
+    parse_projected_eigen=False,
+    parse_potcar_file=False,
+):
+    return Vasprun(
+        vasprun_path,
+        parse_dos=parse_dos,
+        parse_eigen=parse_eigen,
+        parse_projected_eigen=parse_projected_eigen,
+        parse_potcar_file=parse_potcar_file,
+    )
 
 
 def is_converged(vasprun_path: Path):
@@ -29,7 +46,7 @@ def get_status(vasprun_path: Path):
         return Status.NOT_FOUND
 
     try:
-        vasprun = Vasprun(vasprun_path)
+        vasprun = get_vasprun(vasprun_path)
     except Exception:
         return Status.LOAD_FAILED
 
@@ -42,7 +59,7 @@ def get_status(vasprun_path: Path):
 
 
 def get_fu(vasprun_path: Path):
-    vasprun = Vasprun(vasprun_path)
+    vasprun = get_vasprun(vasprun_path)
     comp = vasprun.final_structure.composition
     return comp.num_atoms / comp.reduced_composition.num_atoms
 
@@ -80,3 +97,25 @@ def add_vasprun_paths_argument(parser: ArgumentParser):
         nargs="+",
         help="Paths of vasprun.xml or directory containing vasprun.xml",
     )
+
+
+def print_parameter_template(parameter_name: str):
+    parser = argparse.ArgumentParser()
+    add_vasprun_paths_argument(parser)
+    args = vars(parser.parse_args())
+    vasprun_paths = cast_vasprun_paths(args.get("vasprun_paths"))
+
+    for vasprun_path in vasprun_paths:
+        print(vasprun_path, end=": ")
+        nelect = get_parameter_value(parameter_name, vasprun_path)
+        print(nelect if nelect else get_status(vasprun_path))
+
+
+def get_parameter_value(parameter_name: str, vasprun_path: Path):
+    if is_converged(vasprun_path):
+        vasprun = get_vasprun(vasprun_path)
+        nelect = vasprun.parameters[parameter_name]
+        return int(nelect)
+    else:
+        return None
+        return None

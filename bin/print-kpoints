@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 
-from pymatgen.io.vasp import Vasprun
+from vasputils import get_vasprun
 
 
 def main():
@@ -10,7 +10,7 @@ def main():
     parser.add_argument("vasprun_path", type=str, help="vasprun.xml Path")
     args = vars(parser.parse_args())
     vasprun_path = Path(args.get("vasprun_path"))
-    vasprun = Vasprun(vasprun_path)
+    vasprun = get_vasprun(vasprun_path)
     print(vasprun.kpoints)
 
 

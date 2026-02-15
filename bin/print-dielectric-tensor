@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 
-from pymatgen.io.vasp import Vasprun
-
 from vasputils import (
     add_vasprun_paths_argument,
     cast_vasprun_paths,
     get_status,
+    get_vasprun,
     is_converged,
 )
 
@@ -27,7 +26,7 @@ def main():
 
 
 def print_dielectric_tensor(vasprun_path):
-    vasprun = Vasprun(vasprun_path)
+    vasprun = get_vasprun(vasprun_path)
     epsilon = vasprun.epsilon_static
     for i in range(3):
         for j in range(3):

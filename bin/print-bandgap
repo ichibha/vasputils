@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 
-from pymatgen.io.vasp import Vasprun
-
 from vasputils import (
     add_vasprun_paths_argument,
     cast_vasprun_paths,
     get_status,
+    get_vasprun,
     is_converged,
 )
 
@@ -20,7 +19,7 @@ def main():
     for vasprun_path in vasprun_paths:
         print(f"{vasprun_path}", end=": ")
         if is_converged(vasprun_path):
-            vasprun = Vasprun(vasprun_path)
+            vasprun = get_vasprun(vasprun_path)
             bandgap = vasprun.complete_dos.get_gap()
             print(f"{bandgap:.8f} eV")
         else:

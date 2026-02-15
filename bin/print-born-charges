@@ -8,6 +8,7 @@ from vasputils import (
     add_vasprun_paths_argument,
     cast_vasprun_paths,
     get_status,
+    get_vasprun,
     is_converged,
 )
 
@@ -28,7 +29,7 @@ def main():
 
 
 def print_born_charges(vasprun_path):
-    vasprun = Vasprun(vasprun_path)
+    vasprun = get_vasprun(vasprun_path)
     born_charges = get_born_charges(vasprun=vasprun)
     for num, born_charge in enumerate(born_charges):
         print(f"  Atom {num+1}")
