@@ -118,4 +118,3 @@ def get_parameter_value(parameter_name: str, vasprun_path: Path):
         return int(nelect)
     else:
         return None
-        return None
