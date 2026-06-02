@@ -19,7 +19,7 @@ def main():
     for vasprun_path in vasprun_paths:
         print(f"{vasprun_path}", end=": ")
         if is_converged(vasprun_path):
-            vasprun = get_vasprun(vasprun_path)
+            vasprun = get_vasprun(vasprun_path, parse_dos=True)
             bandgap = vasprun.complete_dos.get_gap()
             print(f"{bandgap:.8f} eV")
         else:
