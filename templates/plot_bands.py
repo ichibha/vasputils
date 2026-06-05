@@ -3,15 +3,7 @@ import matplotlib.pyplot as plt
 from pymatgen.electronic_structure.plotter import BSPlotter
 from pymatgen.io.vasp.outputs import BandStructure, Vasprun
 
-# matplotlib settings
-plt.rcParams["font.size"] = 18
-plt.rcParams["figure.titlesize"] = 18
-plt.rcParams["axes.labelsize"] = 18
-plt.rcParams["xtick.labelsize"] = 14
-plt.rcParams["ytick.labelsize"] = 14
-plt.rcParams["legend.fontsize"] = 14
-plt.rcParams["figure.autolayout"] = True
-plt.rcParams["axes.formatter.useoffset"] = False
+from vasputils import set_plot_style
 
 # vasprun.xmlからバンド分散データを読み込む
 vasprun = Vasprun("vasprun.xml")
@@ -25,8 +17,9 @@ plot = plotter.get_plot(ylim=[-20, 20])
 
 # フェルミレベルをプロットする
 plt.axhline(0, color="black", linestyle="dotted")
-
 plot.get_legend().remove()  # 凡例を削除
+
+set_plot_style()
 plt.xlabel("")  # x軸ラベルを削除
 plt.ylabel(r"$E - E_{\mathrm{Fermi}}$ (eV)")
 plt.savefig("bands.pdf")

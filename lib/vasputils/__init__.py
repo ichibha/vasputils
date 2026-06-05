@@ -7,6 +7,7 @@ from typing import Iterable
 
 import numpy as np
 from ase.io import read
+from matplotlib import pyplot as plt
 from pymatgen.core import Structure
 from pymatgen.io.vasp import Vasprun
 from vasputils._status import Status
@@ -118,3 +119,16 @@ def get_parameter_value(parameter_name: str, vasprun_path: Path):
         return int(nelect)
     else:
         return None
+
+
+def set_plot_style(
+    title_size=18, label_size=18, xtick_size=14, ytick_size=14, legend_size=14
+):
+    plt.rcParams["font.size"] = 18
+    plt.rcParams["figure.titlesize"] = title_size
+    plt.rcParams["axes.labelsize"] = label_size
+    plt.rcParams["xtick.labelsize"] = xtick_size
+    plt.rcParams["ytick.labelsize"] = ytick_size
+    plt.rcParams["legend.fontsize"] = legend_size
+    plt.rcParams["figure.autolayout"] = True
+    plt.rcParams["axes.formatter.useoffset"] = False

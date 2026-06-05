@@ -5,16 +5,7 @@ import matplotlib.pyplot as plt
 from pymatgen.electronic_structure.cohp import CompleteCohp
 from pymatgen.electronic_structure.plotter import CohpPlotter
 
-# matplotlib settings
-plt.rcParams["font.size"] = 18
-plt.rcParams["figure.titlesize"] = 18
-plt.rcParams["axes.labelsize"] = 18
-plt.rcParams["xtick.labelsize"] = 14
-plt.rcParams["ytick.labelsize"] = 14
-plt.rcParams["legend.fontsize"] = 14
-plt.rcParams["figure.autolayout"] = True
-plt.rcParams["axes.formatter.useoffset"] = False
-
+from vasputils import set_plot_style
 
 # COHPを読み込む
 completeCohp = CompleteCohp.from_file(
@@ -69,6 +60,7 @@ lines[3].set_color("black")
 lines[3].set_linestyle("solid")
 
 # プロットを出力
+set_plot_style()
 plt.legend()
 plt.savefig("pcohp.pdf")
 plt.show()
