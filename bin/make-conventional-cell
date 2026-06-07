@@ -24,10 +24,10 @@ def main():
 
     # 便宜胞に変換
     if symprec is None:
-        kwargs = dict()
+        sga = SpacegroupAnalyzer(structure)
     else:
-        kwargs = dict(symprec=symprec)
-    sga = SpacegroupAnalyzer(structure, **kwargs)
+        sga = SpacegroupAnalyzer(structure, symprec=symprec)
+
     conventional_structure = sga.get_conventional_standard_structure()
 
     # 便宜胞を表示
