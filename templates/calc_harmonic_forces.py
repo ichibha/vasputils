@@ -14,7 +14,7 @@ def main():
         shutil.copy("supercell/KPOINTS", directory)
         shutil.copy("supercell/POTCAR", directory)
         shutil.copy("supercell/WAVECAR", directory)
-        subprocess.run("mpirun vasp_std | tee vasp.out", cmd=True)
+        subprocess.run("mpirun vasp_std | tee vasp.out", shell=True)
 
 
 if __name__ == "__main__":
