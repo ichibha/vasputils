@@ -9,6 +9,7 @@ from ase import Atoms
 from ase.calculators.vasp import Vasp
 from ase.io import read
 from matplotlib import pyplot as plt
+
 from vasputils import are_forces_converged, get_lattice, get_total_energy, is_converged
 
 # matplotlib settings
