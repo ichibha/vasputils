@@ -87,8 +87,25 @@ def get_lattice(poscar_path: Path):
     return Structure.from_file(poscar_path).lattice
 
 
+def cast_vasprun_path(vasprun_path: PathLike):
+    vasprun_path = Path(vasprun_path)
+
+    if vasprun_path.is_dir():
+        return vasprun_path / "vasprun.xml"
+    else:
+        return vasprun_path
+
+
 def cast_vasprun_paths(vasprun_paths: Iterable[PathLike]):
-    return [p / "vasprun.xml" if p.is_dir() else p for p in map(Path, vasprun_paths)]
+    return list(map(cast_vasprun_path, vasprun_paths))
+
+
+def add_vasprun_path_argument(parser: ArgumentParser):
+    parser.add_argument(
+        "vasprun_path",
+        type=str,
+        help="Path of vasprun.xml file or directory containing vasprun.xml file",
+    )
 
 
 def add_vasprun_paths_argument(parser: ArgumentParser):
@@ -96,7 +113,7 @@ def add_vasprun_paths_argument(parser: ArgumentParser):
         "vasprun_paths",
         type=str,
         nargs="+",
-        help="Paths of vasprun.xml or directory containing vasprun.xml",
+        help="Paths of vasprun.xml file or directories containing vasprun.xml files",
     )
 
 
