@@ -57,3 +57,7 @@ def plot(vasprun_path: Path, emin: float, emax: float, show: bool):
         plt.show()
 
     plt.close()
+
+
+if __name__ == "__main__":
+    main()
