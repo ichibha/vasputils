@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+
+from pymatgen.io.vasp.outputs import Chgcar
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("parchg_paths", type=str, nargs="+")
+    args = parser.parse_args()
+    parchg_paths = list(map(Path, args.parchg_paths))
+    for parchg_path in parchg_paths:
+        parse_parchg(parchg_path)
+
+
+def parse_parchg(parchg_path: Path):
+    parchg = Chgcar.from_file(parchg_path)
+
+    rho = dict()
+    rho["total"] = parchg.data["total"]
+    rho["diff"] = parchg.data["diff"]
+    rho["up"] = 0.5 * (rho["total"] + rho["diff"])
+    rho["down"] = 0.5 * (rho["total"] - rho["diff"])
+
+    for key in ["up", "down"]:
+        Chgcar(parchg.poscar, {"total": rho[key]}).write_file(
+            parchg_path.with_name(f"{parchg_path.stem}_{key}.vasp")
+        )
+
+
+if __name__ == "__main__":
+    main()
