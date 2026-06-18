@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pymatgen.io.vasp.outputs import Chgcar
 
-
+ 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("parchg_paths", type=str, nargs="+")
