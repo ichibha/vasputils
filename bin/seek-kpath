@@ -8,25 +8,27 @@ from pymatgen.symmetry.bandstructure import HighSymmKpath
 
 
 def main():
-    # コマンド引数を定義
     parser = argparse.ArgumentParser(description="seek kpath for band plot")
     parser.add_argument("poscar_path", type=str, help="POSCAR path")
     parser.add_argument("--intervals", type=int)
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--vasp", action="store_true")
-    group.add_argument("--phonopy", action="store_true")
+    group = parser.add_mutually_exclusive_group(required=False)
+    group.add_argument("--vasp", dest="format", action="store_const", const="vasp")
+    group.add_argument(
+        "--phonopy", dest="format", action="store_const", const="phonopy"
+    )
+    parser.set_defaults(format="vasp")
 
-    # コマンド引数を取得
-    args = vars(parser.parse_args())
-    poscar_path = Path(args.get("poscar_path"))
-    for_vasp: bool = args.get("vasp")
-    for_phonopy: bool = args.get("phonopy")
-    num_intervals: int = args.get("intervals")
+    args = parser.parse_args()
+    poscar_path = Path(args.poscar_path)
+    num_intervals = args.intervals
+    output_format = args.format
 
-    if for_vasp:
+    if output_format == "vasp":
         print_kpath_for_vasp(poscar_path, num_intervals)
-    elif for_phonopy:
+    elif output_format == "phonopy":
         print_kpath_for_phonopy(poscar_path, num_intervals)
+    else:
+        raise ValueError(f"Format {output_format} undefined.")
 
 
 def print_kpath_for_vasp(poscar_path: Path, num_intervals: int | None):
