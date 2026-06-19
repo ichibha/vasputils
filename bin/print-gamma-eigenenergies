@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+import argparse
+
+from pymatgen.electronic_structure.core import Spin
+
+from vasputils import (
+    add_vasprun_path_argument,
+    cast_vasprun_path,
+    get_status,
+    get_vasprun,
+    is_converged,
+)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    add_vasprun_path_argument(parser)
+    args = parser.parse_args()
+    vasprun_path = cast_vasprun_path(args.vasprun_path)
+    vasprun = get_vasprun(vasprun_path, parse_eigen=True)
+
+    for key, eigenvalues in vasprun.eigenvalues.items():
+        spin_kind = {Spin.up: "up", Spin.down: "down"}.get(key, "unknown")
+        print(f"spin {spin_kind}")
+
+        for i, eigenvalue in enumerate(eigenvalues[0]):
+            energy = eigenvalue[0]
+            occupation = eigenvalue[1]
+            print(f"{i:4}  {energy:.4f}  {occupation:.4f}")
+
+        print()
+
+
+# eigenvalues = vr.eigenvalues
+
+
+#     for vasprun_path in vasprun_paths:
+#         print(f"{vasprun_path}", end=": ")
+#         if is_converged(vasprun_path):
+#             vasprun = get_vasprun(vasprun_path, parse_dos=True)
+#             bandgap = vasprun.complete_dos.get_gap()
+#             print(f"{bandgap:.8f} eV")
+#         else:
+#             print(get_status(vasprun_path))
+
+
+if __name__ == "__main__":
+    main()

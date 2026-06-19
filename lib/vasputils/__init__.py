@@ -105,6 +105,8 @@ def add_vasprun_path_argument(parser: ArgumentParser):
         "vasprun_path",
         type=str,
         help="Path of vasprun.xml file or directory containing vasprun.xml file",
+        nargs="?",
+        default="vasprun.xml",
     )
 
 
@@ -112,8 +114,9 @@ def add_vasprun_paths_argument(parser: ArgumentParser):
     parser.add_argument(
         "vasprun_paths",
         type=str,
-        nargs="+",
+        nargs="*",
         help="Paths of vasprun.xml file or directories containing vasprun.xml files",
+        default=["vasprun.xml"],
     )
 
 
