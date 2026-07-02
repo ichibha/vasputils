@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
+import os
 from argparse import ArgumentParser
-from os import PathLike
 from pathlib import Path
 from typing import Iterable
 
@@ -13,15 +13,28 @@ from pymatgen.io.vasp import Vasprun
 from vasputils._status import Status
 
 
+def cast_vasprun_path(vasprun_path: os.PathLike):
+    vasprun_path = Path(vasprun_path)
+
+    if vasprun_path.is_dir():
+        return vasprun_path / "vasprun.xml"
+    else:
+        return vasprun_path
+
+
+def cast_vasprun_paths(vasprun_paths: Iterable[os.PathLike]):
+    return list(map(cast_vasprun_path, vasprun_paths))
+
+
 def get_vasprun(
-    vasprun_path: Path,
+    vasprun_path: os.PathLike,
     parse_dos=False,
     parse_eigen=False,
     parse_projected_eigen=False,
     parse_potcar_file=False,
 ):
     return Vasprun(
-        vasprun_path,
+        cast_vasprun_path(vasprun_path),
         parse_dos=parse_dos,
         parse_eigen=parse_eigen,
         parse_projected_eigen=parse_projected_eigen,
@@ -29,20 +42,21 @@ def get_vasprun(
     )
 
 
-def is_converged(vasprun_path: Path):
+def is_converged(vasprun_path: os.PathLike):
+    vasprun_path = cast_vasprun_path(vasprun_path)
     status = get_status(vasprun_path)
-    if status == Status.CONVERGED:
-        return True
-    else:
-        return False
+    return status == Status.CONVERGED
 
 
-def are_forces_converged(vasprun_path: Path, threshold: float):
+def are_forces_converged(vasprun_path: os.PathLike, threshold: float):
+    vasprun_path = cast_vasprun_path(vasprun_path)
     force_magnitudes = get_force_magnitudes(vasprun_path)
     return force_magnitudes.max() <= threshold
 
 
-def get_status(vasprun_path: Path):
+def get_status(vasprun_path: os.PathLike):
+    vasprun_path = cast_vasprun_path(vasprun_path)
+
     if not vasprun_path.exists():
         return Status.NOT_FOUND
 
@@ -59,45 +73,36 @@ def get_status(vasprun_path: Path):
         return Status.CONVERGED
 
 
-def get_fu(vasprun_path: Path):
+def get_fu(vasprun_path: os.PathLike):
+    vasprun_path = cast_vasprun_path(vasprun_path)
     vasprun = get_vasprun(vasprun_path)
     comp = vasprun.final_structure.composition
     return comp.num_atoms / comp.reduced_composition.num_atoms
 
 
-def get_total_energy(vasprun_path: Path) -> float:
+def get_total_energy(vasprun_path: os.PathLike) -> float:
+    vasprun_path = cast_vasprun_path(vasprun_path)
     atoms = read(vasprun_path)
     total_energy = atoms.get_potential_energy()
     return total_energy
 
 
-def get_forces(vasprun_path: Path) -> np.ndarray:
+def get_forces(vasprun_path: os.PathLike) -> np.ndarray:
+    vasprun_path = cast_vasprun_path(vasprun_path)
     atoms = read(vasprun_path)
     forces = atoms.get_forces()
     return forces
 
 
-def get_force_magnitudes(vasprun_path: Path) -> np.ndarray:
+def get_force_magnitudes(vasprun_path: os.PathLike) -> np.ndarray:
+    vasprun_path = cast_vasprun_path(vasprun_path)
     forces = get_forces(vasprun_path)
     magnitudes = np.linalg.norm(forces, axis=1)
     return magnitudes
 
 
-def get_lattice(poscar_path: Path):
+def get_lattice(poscar_path: os.PathLike):
     return Structure.from_file(poscar_path).lattice
-
-
-def cast_vasprun_path(vasprun_path: PathLike):
-    vasprun_path = Path(vasprun_path)
-
-    if vasprun_path.is_dir():
-        return vasprun_path / "vasprun.xml"
-    else:
-        return vasprun_path
-
-
-def cast_vasprun_paths(vasprun_paths: Iterable[PathLike]):
-    return list(map(cast_vasprun_path, vasprun_paths))
 
 
 def add_vasprun_path_argument(parser: ArgumentParser):
@@ -120,7 +125,7 @@ def add_vasprun_paths_argument(parser: ArgumentParser):
     )
 
 
-def print_parameter_template(parameter_name: str):
+def print_parameter_template(param_name: str):
     parser = argparse.ArgumentParser()
     add_vasprun_paths_argument(parser)
     args = vars(parser.parse_args())
@@ -128,15 +133,21 @@ def print_parameter_template(parameter_name: str):
 
     for vasprun_path in vasprun_paths:
         print(vasprun_path, end=": ")
-        nelect = get_parameter_value(parameter_name, vasprun_path)
-        print(nelect if nelect else get_status(vasprun_path))
+
+        param_value = get_parameter_value(param_name, vasprun_path)
+        if param_value is None:
+            print(get_status(vasprun_path))
+        else:
+            print(param_value)
 
 
-def get_parameter_value(parameter_name: str, vasprun_path: Path):
+def get_parameter_value(param_name: str, vasprun_path: os.PathLike):
+    vasprun_path = cast_vasprun_path(vasprun_path)
+
     if is_converged(vasprun_path):
         vasprun = get_vasprun(vasprun_path)
-        nelect = vasprun.parameters[parameter_name]
-        return int(nelect)
+        param_value = vasprun.parameters[param_name]
+        return param_value
     else:
         return None
 
