@@ -4,8 +4,9 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 from pymatgen.electronic_structure.plotter import DosPlotter
+
 from vasputils import (
-    add_vasprun_path_argument,
+    add_vasprun_paths_argument,
     cast_vasprun_path,
     get_vasprun,
     set_plot_style,
@@ -14,17 +15,19 @@ from vasputils import (
 
 def main():
     parser = argparse.ArgumentParser()
-    add_vasprun_path_argument(parser)
+    add_vasprun_paths_argument(parser)
     parser.add_argument("--emin", type=float, default=-10)
     parser.add_argument("--emax", type=float, default=+10)
     parser.add_argument("--show", action="store_true")
     args = parser.parse_args()
-    plot(
-        vasprun_path=cast_vasprun_path(args.vasprun_path),
-        emin=args.emin,
-        emax=args.emax,
-        show=args.show,
-    )
+
+    for vasprun_path in args.vasprun_paths:
+        plot(
+            vasprun_path=cast_vasprun_path(vasprun_path),
+            emin=args.emin,
+            emax=args.emax,
+            show=args.show,
+        )
 
 
 def plot(vasprun_path: Path, emin: float, emax: float, show: bool):
